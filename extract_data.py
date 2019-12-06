@@ -10,6 +10,9 @@ for root, dirs, files in os.walk(file_dir):
         if name==training_file_name:
             data_file_path = os.path.join(root, name)
 
+
+#open the .csv file
+
 training_data_file = open(data_file_path, 'r')
 training_data = training_data_file.readlines()
 
