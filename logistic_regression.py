@@ -28,7 +28,6 @@ class Team():
         print(self.name)
         print(self.data)
 
-
 teamList = []
 for i in range(len(df_teams)):
     count_1 = 0
