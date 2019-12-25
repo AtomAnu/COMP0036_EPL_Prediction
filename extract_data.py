@@ -3,7 +3,7 @@ import pandas as pd
 
 # training_file_name = 'epl-training.csv'
 
-def extract_data(training_file_name):
+def extract_data(file_name):
     """
     Extract the data file in the DataFrame type from the input file name
 
@@ -14,7 +14,7 @@ def extract_data(training_file_name):
     file_dir = os.path.dirname(os.path.abspath(__file__))
     for root, dirs, files in os.walk(file_dir):
         for name in files:
-            if name == training_file_name:
+            if name == file_name:
                 data_file_path = os.path.join(root, name)
 
     csv_data = pd.read_csv(data_file_path)
@@ -29,4 +29,3 @@ def extract_data(training_file_name):
     csv_data_formatted = pd.concat([csv_data_formatted, pd.get_dummies(csv_data_stripped.iloc[:, 1:])], axis=1)
 
     return csv_data_formatted
-
