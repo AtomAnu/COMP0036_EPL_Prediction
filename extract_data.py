@@ -1,8 +1,8 @@
 import os
 import pandas as pd
 
-training_file_name = 'epl-training.csv'
-test_file_name = 'epl-test.csv'
+# training_file_name = 'epl-training.csv'
+# test_file_name = 'epl-test.csv'
 
 def load_file(file_name):
     """
