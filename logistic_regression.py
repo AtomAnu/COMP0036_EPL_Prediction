@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from sklearn.utils import shuffle
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import train_test_split
-from models_compare import get_accuracy
+from models_compare import get_best_model
 
 df_seeds = pd.read_csv('/Users/Manny/Desktop/DataFiles/epl-training.csv') # import training data
 df_seeds.head()
@@ -93,4 +93,4 @@ for i in range(len(df_teams)):
 #         prob = logreg[i].predict_proba(test_data[i]) # get the probabilities for each result
 #         yy_prob.append(prob)
 
-get_accuracy(x_train[0], y_train[0])
+classifier = get_best_model(x_train[0], y_train[0])
