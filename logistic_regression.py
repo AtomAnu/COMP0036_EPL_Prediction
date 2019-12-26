@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from sklearn.utils import shuffle
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import train_test_split
+from models_compare import get_accuracy
 
 df_seeds = pd.read_csv('/Users/Manny/Desktop/DataFiles/epl-training.csv') # import training data
 df_seeds.head()
@@ -75,19 +76,21 @@ for i in range(len(df_teams)):
     y_train.append(y_train_temp)
     y_test.append(y_test_temp)
 
-logreg = []
+# logreg = []
 
-for i in range(len(df_teams)):
-    logreg_temp = LogisticRegression(solver='lbfgs', multi_class='auto') # create the Logistic Regression model
-    logreg_temp.fit(x_train[i], y_train[i]) # train the model
-    logreg.append(logreg_temp)
+# for i in range(len(df_teams)):
+#     logreg_temp = LogisticRegression(solver='lbfgs', multi_class='auto') # create the Logistic Regression model
+#     logreg_temp.fit(x_train[i], y_train[i]) # train the model
+#     logreg.append(logreg_temp)
 
-yy = []
-yy_prob = []
+# yy = []
+# yy_prob = []
 
-for i in range(len(test_data)):
-    if not test_data[i].empty:
-        prediction = logreg[i].predict(test_data[i]) # predict the result
-        yy.append(prediction)
-        prob = logreg[i].predict_proba(test_data[i]) # get the probabilities for each result
-        yy_prob.append(prob)
+# for i in range(len(test_data)):
+#     if not test_data[i].empty:
+#         prediction = logreg[i].predict(test_data[i]) # predict the result
+#         yy.append(prediction)
+#         prob = logreg[i].predict_proba(test_data[i]) # get the probabilities for each result
+#         yy_prob.append(prob)
+
+get_accuracy(x_train[0], y_train[0])
