@@ -1,79 +1,77 @@
 import os
-from dateutil.parser import parse
+import pandas as pd
 
-file_dir = os.path.dirname(os.path.abspath(__file__))
+# training_file_name = 'epl-training.csv'
+# test_file_name = 'epl-test.csv'
 
-training_file_name = 'epl-training.csv'
 
-for root, dirs, files in os.walk(file_dir):
-    for name in files:
-        if name==training_file_name:
-            data_file_path = os.path.join(root, name)
-
-# print(data_file_path)
-
-#open the .csv file
-
-training_data_file = open(data_file_path, 'r')
-training_data = training_data_file.readlines()
-
-training_data_matrix = []
-for line in range(0,len(training_data)):
-    training_data_matrix.append((training_data[line].split(',,'))[0].split(','))
-
-def is_date(string, fuzzy=False):
+def load_file(file_name):
     """
-    This module check if the input string is convertible to a date format or not.
+    Load .csv file using pd.read_csv
 
-    :param string: input string
-    :param fuzzy: boolean that can be set to True to ignore all tokens in the string
-
-    :return: True if the string is convertible to date and False if vice versa
+    :param file_name: string containing the file name
+    :return: extracted and stripped data in the DataFrame type
     """
-    try:
-        parse(string, fuzzy)
-        return True
-    except ValueError:
-        return False
 
-"""
-List of all the features available in the training file.
-['Date', 'HomeTeam', 'AwayTeam', 'FTHG', 'FTAG', 'FTR', 'HTHG', 'HTAG', 'HTR',
-'Referee', 'HS', 'AS', 'HST', 'AST', 'HF', 'AF', 'HC', 'AC', 'HY', 'AY', 'HR', 'AR']
-"""
+    #find the path of the wanted file
+    file_dir = os.path.dirname(os.path.abspath(__file__))
+    for root, dirs, files in os.walk(file_dir):
+        for name in files:
+            if name == file_name:
+                file_path = os.path.join(root, name)
 
-categorical_features_col_num = []
-for cell in training_data_matrix[1]:
-    if cell.isdigit() is False:
-        if is_date(cell)==False:
-            starting_idx = -1
-            while True:
-                try:
-                    idx = training_data_matrix[1].index(cell, starting_idx + 1)
-                except ValueError:
-                    break
-                else:
-                    if not idx in categorical_features_col_num:
-                        categorical_features_col_num.append(idx)
-                    starting_idx = idx
+    #load the wanted file using pd.read_csv
+    loaded_data = pd.read_csv(file_path)
 
-categorical_feature_names = []
-for idx in categorical_features_col_num:
-    exec(training_data_matrix[0][idx]+'=[]')
-    categorical_feature_names.append(training_data_matrix[0][idx])
+    #remove blank columns
+    data_columns = list(loaded_data)
+    for col in data_columns:
+        if 'Unnamed' not in col:
+            last_col_idx = data_columns.index(col)
+    data_stripped = loaded_data.iloc[:, :last_col_idx + 1]
 
-# list of all the categorical feature names
-print('Categorical Feature Names:')
-print(categorical_feature_names)
-print('\n')
-
-for row in training_data_matrix[1:]:
-    for idx in categorical_features_col_num:
-        exec('list='+training_data_matrix[0][idx])
-        exec('if row[idx] not in list: '+training_data_matrix[0][idx]+'.append(row[idx])')
-
-for feature in categorical_feature_names:
-    exec('print("{0}: {1}".format(feature,'+feature+'))')
-    print('\n')
+    return data_stripped
 
 
+def format_data(training_file_name, test_file_name):
+    """
+    Format the loaded training and test data. Date column is formatted. Columns with categorical features are converted
+    to multiple columns with the binary format.
+
+    :param training_file_name: string containing the training file name
+    :param test_file_name: string containing the test file name
+    :return: formatted training and test data in the DataFrame type
+    """
+
+    #load training and test files
+    training_data_stripped = load_file(training_file_name)
+    test_data_stripped = load_file(test_file_name)
+
+    #convert all columns categorical features into multiple columns with the binary format
+    #training and test data are combined
+    training_and_test_binary = pd.get_dummies(pd.concat([training_data_stripped.drop(columns=['Date']),
+                                                         test_data_stripped.drop(columns=['Date'])], sort=False))
+
+    #extract the training data
+    training_binary = training_and_test_binary.iloc[:len(
+        training_data_stripped), :]
+
+    #extract the test data
+    test_binary = training_and_test_binary.iloc[len(
+        training_data_stripped):, :]
+    test_binary_columns = [col for col in training_and_test_binary
+                           for original_col in list(test_data_stripped) if col.startswith(original_col)]
+    test_binary = test_binary[test_binary_columns]
+
+    #format the Date column
+    training_date_formatted = pd.DataFrame(
+        pd.to_datetime(training_data_stripped.iloc[:, 0]))
+    test_date_formatted = pd.DataFrame(
+        pd.to_datetime(test_data_stripped.iloc[:, 0]))
+
+    #combine the Date column with the rest
+    training_data_formatted = pd.concat(
+        [training_date_formatted, training_binary], axis=1)
+    test_data_formatted = pd.concat([test_date_formatted, test_binary], axis=1)
+
+    return training_data_formatted, test_data_formatted
