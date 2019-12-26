@@ -1,14 +1,10 @@
 import os
 import pandas as pd
 
-# training_file_name = 'epl-training.csv'
-# test_file_name = 'epl-test.csv'
-
 
 def load_file(file_name):
     """
     Load .csv file using pd.read_csv
-
     :param file_name: string containing the file name
     :return: extracted and stripped data in the DataFrame type
     """
@@ -37,7 +33,6 @@ def format_data(training_file_name, test_file_name):
     """
     Format the loaded training and test data. Date column is formatted. Columns with categorical features are converted
     to multiple columns with the binary format.
-
     :param training_file_name: string containing the training file name
     :param test_file_name: string containing the test file name
     :return: formatted training and test data in the DataFrame type
