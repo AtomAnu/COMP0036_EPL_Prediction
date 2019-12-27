@@ -4,14 +4,18 @@ from sklearn.metrics import accuracy_score
 from sklearn.linear_model import LogisticRegression
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.linear_model import Ridge
+from sklearn.svm import SVC
 import matplotlib.pyplot as plt
 
 # different model with different parameters
 classifiers = {
     'L2 logistic (Multinomial)': LogisticRegression(solver='lbfgs', multi_class='auto'),
     'k-nearest neighbor': KNeighborsClassifier(),
-    'ridge regression': Ridge(alpha = 1.0)
+    'ridge regression': Ridge(alpha = 1.0),
+    'support vector machine': SVC(gamma = 'auto')
 }
+
+kernels_l = ['linear', 'poly', 'rbf', 'sigmoid']
 
 def get_best_model(X, y):
     # n_classifiers = len(classifiers)
@@ -40,10 +44,34 @@ def get_best_model(X, y):
                     result_2 = count_2
                 count_2 += 1
             accuracy = max_r
-            x_data.append(name + ' ' + str(a))
+            x_data.append(name + ' (' + str(a) + ')')
             y_data.append(accuracy)
             classifier_f.append(classifier_r[result_2])
-            print("Accuracy (train) for %s: %0.1f%% " % (name + ' ' + str(a), accuracy * 100))
+            print("Accuracy (train) for %s: %0.1f%% " %
+                  (name + ' (' + str(a) + ')', accuracy * 100))
+        elif name == 'support vector machine':
+            max_r = 0
+            count_2 = 0
+            n_alphas = 200
+            result_2 = 0
+            alphas = np.logspace(-10, -2, n_alphas)
+            classifier_r = []
+            for a in kernels_l:
+                classifier = classifier.set_params(kernel = a)
+                classifier.fit(X, y)
+                y_pred = classifier.predict(X)
+                accuracy = accuracy_score(y, y_pred)
+                classifier_r.append(classifier)
+                if accuracy >= max_r:
+                    max_r = accuracy
+                    result_2 = count_2
+                count_2 += 1
+            accuracy = max_r
+            x_data.append(name + ' (' + a + ')')
+            y_data.append(accuracy)
+            classifier_f.append(classifier_r[result_2])
+            print("Accuracy (train) for %s: %0.1f%% " %
+                  (name + ' (' + a + ')', accuracy * 100))
         else:
             classifier.fit(X, y)
             y_pred = classifier.predict(X)
