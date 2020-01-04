@@ -1,11 +1,8 @@
 from extract_data import format_data
 
 from models_parser import compare_regression_models, compare_classification_models
-<<<<<<< HEAD
-=======
 
 import numpy as np
->>>>>>> 8d4975e202c14f3ab4fea7df02706ce7e10856d6
 
 training_file_name = 'epl-training.csv'
 test_file_name = 'epl-test.csv'
@@ -33,12 +30,8 @@ for team in home_team_list:
         print('Data for {} is EMPTY'.format(team))
         continue
 
-<<<<<<< HEAD
-    compare_classification_models(team, group_8_data.iloc[row_idx_list].drop(columns=group_8_y), group_8_data[group_8_y].iloc[row_idx_list])
-=======
     # compare_regression_models(team, group_8_data.iloc[row_idx_list].drop(columns=group_8_y), group_8_data[group_8_y].iloc[row_idx_list])
     final_prediction = compare_classification_models(team, group_8_data.iloc[row_idx_list].drop(columns=group_8_y), group_8_data[group_8_y].iloc[row_idx_list])
 
     team_ratings.append(final_prediction)
 print(team_ratings)
->>>>>>> 8d4975e202c14f3ab4fea7df02706ce7e10856d6
