@@ -29,7 +29,7 @@ for team in home_team_list:
         print('Data for {} is EMPTY'.format(team))
         continue
 
-    # compare_regression_models(team, group_8_data.iloc[row_idx_list].drop(columns=group_8_y), group_8_data[group_8_y].iloc[row_idx_list])
+    # final_prediction = compare_regression_models(team, group_8_data.iloc[row_idx_list].drop(columns=group_8_y), group_8_data[group_8_y].iloc[row_idx_list])
     final_prediction = compare_classification_models(team, group_8_data.iloc[row_idx_list].drop(columns=group_8_y), group_8_data[group_8_y].iloc[row_idx_list])
 
     for i in range(0, len(final_prediction))
