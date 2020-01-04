@@ -1,6 +1,6 @@
 from extract_data import format_data
 
-from models_parser import compare_regression_models
+from models_parser import compare_regression_models, compare_classification_models
 
 training_file_name = 'epl-training.csv'
 test_file_name = 'epl-test.csv'
@@ -27,4 +27,4 @@ for team in home_team_list:
         print('Data for {} is EMPTY'.format(team))
         continue
 
-    compare_regression_models(team, group_8_data.iloc[row_idx_list].drop(columns=group_8_y), group_8_data[group_8_y].iloc[row_idx_list])
+    compare_classification_models(team, group_8_data.iloc[row_idx_list].drop(columns=group_8_y), group_8_data[group_8_y].iloc[row_idx_list])
