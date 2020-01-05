@@ -7,13 +7,18 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
 
+from sklearn.model_selection import LeaveOneOut
+
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 
 def compare_regression_models(team_name, X_data, y_data):
 
     degrees = range(1,15)
     alphas = [1e-20, 1e-15, 1e-8, 1e-4, 1e-3, 1e-2, 0.1, 5, 20, 1000]
+
+    loo = LeaveOneOut()
 
     regressions = {
         'Ridge Regression': Ridge(alpha=alphas[0], max_iter=1e5),
@@ -23,6 +28,7 @@ def compare_regression_models(team_name, X_data, y_data):
 
     final_score = []
     final_prediction = []
+    y_pred = []
     r_name = []
 
     for index, (name, regression) in enumerate(regressions.items()):
@@ -44,10 +50,19 @@ def compare_regression_models(team_name, X_data, y_data):
         if index == 2:
             team_obj_reg = Team(team_name, X_data, y_data,
                                   degree=best_degree)
-            regression.fit(team_obj_reg.X_train,
-                           team_obj_reg.y_train)
-            y_pred = regression.predict(team_obj.X_test)
+            # regression.fit(team_obj_reg.X_train,
+            #                team_obj_reg.y_train)
+            
+            for train_idx, test_idx in loo.split(team_obj_reg.X_all):
+                X_all_temp = team_obj_reg.X_all
+                y_temp = team_obj_reg.y
+                y_temp.index = range(len(y_temp))
+                regression.fit(X_all_temp[train_idx], y_temp.loc[train_idx])
+                y_pred.append(regression.predict(X_all_temp[test_idx]))
+            
             final_prediction.append(y_pred)
+            # y_pred = regression.predict(team_obj_reg.X_test)
+            # final_prediction.append(y_pred)
             score_temp = regression.score(
                 team_obj_reg.X_test, team_obj_reg.y_test)
             final_score.append(score_temp)
@@ -70,10 +85,20 @@ def compare_regression_models(team_name, X_data, y_data):
             team_obj_reg = Team(team_name, X_data, y_data,
                                 degree=best_degree)
             regression.set_params(alpha=best_alpha)
-            regression.fit(team_obj_reg.X_train,
-                           team_obj_reg.y_train)
-            y_pred = regression.predict(team_obj.X_test)
+            # regression.fit(team_obj_reg.X_train,
+            #                team_obj_reg.y_train)
+            
+            for train_idx, test_idx in loo.split(team_obj_reg.X_all):
+                X_all_temp = team_obj_reg.X_all
+                y_temp = team_obj_reg.y
+                y_temp.index = range(len(y_temp))
+                regression.fit(X_all_temp[train_idx], y_temp.loc[train_idx])
+                y_pred.append(regression.predict(X_all_temp[test_idx]))
+
             final_prediction.append(y_pred)
+
+            # y_pred = regression.predict(team_obj.X_test)
+            # final_prediction.append(y_pred)
             score_temp = regression.score(
                 team_obj_reg.X_test, team_obj_reg.y_test)
             final_score.append(score_temp)
@@ -85,10 +110,20 @@ def compare_regression_models(team_name, X_data, y_data):
             team_obj_reg = Team(team_name, X_data, y_data,
                                 degree=best_degree)
             regression.set_params(alpha=best_alpha)
-            regression.fit(team_obj_reg.X_train,
-                           team_obj_reg.y_train)
-            y_pred = regression.predict(team_obj.X_test)
+            # regression.fit(team_obj_reg.X_train,
+            #                team_obj_reg.y_train)
+            
+            for train_idx, test_idx in loo.split(team_obj_reg.X_all):
+                X_all_temp = team_obj_reg.X_all
+                y_temp = team_obj_reg.y
+                y_temp.index = range(len(y_temp))
+                regression.fit(X_all_temp[train_idx], y_temp.loc[train_idx])
+                y_pred.append(regression.predict(X_all_temp[test_idx]))
+
             final_prediction.append(y_pred)
+
+            # y_pred = regression.predict(team_obj.X_test)
+            # final_prediction.append(y_pred)
             score_temp = regression.score(
                 team_obj_reg.X_test, team_obj_reg.y_test)
             final_score.append(score_temp)
@@ -118,15 +153,26 @@ def compare_classification_models(team_name, X_data, y_data):
         'Support Vector Machine': SVC(gamma='auto')
     }
 
+    loo = LeaveOneOut()
+
     team_obj = Team(team_name, X_data, y_data)
+    X_all_temp = team_obj.X_all
+    y_temp = team_obj.y
+    y_temp.index = range(len(y_temp))
     final_prediction = []
     final_score = []
+ 
     r_name = []
-    
+
     for index, (name, classifier) in enumerate(classifiers.items()):
-        classifier.fit(team_obj.X_train, team_obj.y_train)
-        y_pred = classifier.predict(team_obj.X_test)
-        final_prediction.append(y_pred)
+        y_pred = []
+        for train_idx, test_idx in loo.split(team_obj.X_all):
+            classifier.fit(X_all_temp[train_idx], y_temp.loc[train_idx])
+            y_pred.append(classifier.predict(X_all_temp[test_idx]))
+        final_prediction.append(np.array(y_pred).ravel())
+        # classifier.fit(team_obj.X_train, team_obj.y_train)
+        # y_pred = classifier.predict(team_obj.X_test)
+        # final_prediction.append(y_pred)
         score_temp = classifier.score(team_obj.X_test, team_obj.y_test)
         final_score.append(score_temp)
         r_name.append(name)
