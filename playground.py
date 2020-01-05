@@ -1,11 +1,8 @@
 from extract_data import format_data
 
 from models_parser import compare_regression_models, compare_classification_models
-<<<<<<< HEAD
 
 import numpy as np
-=======
->>>>>>> d07f2c74c5c547d1fd4779e64443174e0454073f
 
 training_file_name = 'epl-training.csv'
 test_file_name = 'epl-test.csv'
@@ -34,16 +31,19 @@ for team in home_team_list:
         print('Data for {} is EMPTY'.format(team))
         continue
 
-<<<<<<< HEAD
     # compare_regression_models(team, group_8_data.iloc[row_idx_list].drop(columns=group_8_y), group_8_data[group_8_y].iloc[row_idx_list])
-=======
-    # final_prediction = compare_regression_models(team, group_8_data.iloc[row_idx_list].drop(columns=group_8_y), group_8_data[group_8_y].iloc[row_idx_list])
->>>>>>> d07f2c74c5c547d1fd4779e64443174e0454073f
     final_prediction = compare_classification_models(team, group_8_data.iloc[row_idx_list].drop(columns=group_8_y), group_8_data[group_8_y].iloc[row_idx_list])
+    # print(final_prediction)
+    rating = 1000
+    result = group_8_data[group_8_y].iloc[row_idx_list]
+    result.index = range(len(result))
+    for i in range(0, len(final_prediction) - 1):
+        rating = rating + 20 * (result.loc[i] - final_prediction[i])
+    
+    team_ratings.append(rating)
+    # for i in range(0, len(final_prediction)):
+    #     final_team_rating[i] = sum(final_prediction[:i+1])/len(final_prediction[:i+1])
 
-    for i in range(0, len(final_prediction))
-        final_team_rating[i] = sum(final_prediction[:i+1])/len(final_prediction[:i+1])
-
-    team_ratings.append(final_team_rating)
+    # team_ratings.append(final_team_rating)
 
 print(team_ratings)
