@@ -44,7 +44,6 @@ def compare_regression_models(team_name, X_data, y_data):
         if index == 2:
             team_obj_reg = Team(team_name, X_data, y_data,
                                   degree=best_degree)
-            regression = LinearRegression()
             regression.fit(team_obj_reg.X_train,
                            team_obj_reg.y_train)
             y_pred = regression.predict(team_obj.X_test)
@@ -70,7 +69,7 @@ def compare_regression_models(team_name, X_data, y_data):
         if index == 0:
             team_obj_reg = Team(team_name, X_data, y_data,
                                 degree=best_degree)
-            regression = Ridge(alpha=best_alpha)
+            regression.set_params(alpha=best_alpha)
             regression.fit(team_obj_reg.X_train,
                            team_obj_reg.y_train)
             y_pred = regression.predict(team_obj.X_test)
@@ -85,7 +84,7 @@ def compare_regression_models(team_name, X_data, y_data):
         if index == 1:
             team_obj_reg = Team(team_name, X_data, y_data,
                                 degree=best_degree)
-            regression = Lasso(alpha=best_alpha)
+            regression.set_params(alpha=best_alpha)
             regression.fit(team_obj_reg.X_train,
                            team_obj_reg.y_train)
             y_pred = regression.predict(team_obj.X_test)
