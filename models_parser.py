@@ -154,7 +154,9 @@ def compare_classification_models(team_name, X_data, y_data):
     }
 
     loo = LeaveOneOut()
-
+    print(team_name)
+    print('Length')
+    print(len(y_data))
     team_obj = Team(team_name, X_data, y_data)
     X_all_temp = team_obj.X_all
     y_temp = team_obj.y
