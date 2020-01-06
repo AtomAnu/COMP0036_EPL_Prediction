@@ -63,8 +63,7 @@ class Ratings:
                 self.rating.loc[rating_h_team, 'HomeRatings'], self.rating.loc[rating_a_team, 'AwayRatings'])
             expect_a = self.compute_score(
                 self.rating.loc[rating_a_team, 'AwayRatings'], self.rating.loc[rating_h_team, 'HomeRatings'])
-            # print(expect_h)
-            # expect_a = 1-expect_h
+
             if X.loc[i, 'FTR_H'] == 1:
                 adjust_h = 1
                 adjust_a = 0
