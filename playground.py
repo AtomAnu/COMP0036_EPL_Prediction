@@ -2,6 +2,8 @@ from extract_data import format_data
 
 from models_parser import compare_regression_models, compare_classification_models
 
+from team_ratings import Ratings
+
 import numpy as np
 import pandas as pd
 
@@ -9,8 +11,11 @@ training_file_name = 'epl-training.csv'
 test_file_name = 'epl-test.csv'
 training_data, test_data = format_data(training_file_name, test_file_name)
 
+team_rating = Ratings(training_data)
+print(team_rating.rating)
+
 group_8_y = ['FTHG']
-group_8_list = ['HF','HY','HR','FTHG']
+group_8_list = ['FTR', 'HF','HY','HR','FTHG']
 group_8_binary_list = [col for col in training_data
                         for chosen_col in group_8_list if col.startswith(chosen_col)]
 group_8_data = training_data[group_8_binary_list]
