@@ -14,6 +14,8 @@ training_data, test_data = format_data(training_file_name, test_file_name)
 team_rating = Ratings(training_data)
 print(team_rating.rating)
 
+training_data = pd.merge(training_data, team_rating)
+
 group_8_y = ['FTHG']
 group_8_list = ['FTR', 'HF','HY','HR','FTHG']
 group_8_binary_list = [col for col in training_data
