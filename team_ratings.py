@@ -1,0 +1,97 @@
+import pandas as pd
+import numpy as np
+
+class Ratings:
+    def __init__(self, X):
+        self.home_team_list = [col for col in X
+                        if col.startswith('HomeTeam')]
+        team_used = []
+        for team in self.home_team_list:
+            row_idx_list = []
+            for row in range(X.shape[0]):
+                if X.loc[row, team] == 1:
+                    row_idx_list.append(row)
+
+            if len(row_idx_list) == 0:
+                print('Data for {} is EMPTY'.format(team))
+                continue
+
+            team_used.append(team)
+        self.home_team_list = team_used
+        self.away_team_list = [col for col in X
+                        if col.startswith('AwayTeam')]
+        team_used = []
+        for team in self.away_team_list:
+            row_idx_list = []
+            for row in range(X.shape[0]):
+                if X.loc[row, team] == 1:
+                    row_idx_list.append(row)
+
+            if len(row_idx_list) == 0:
+                print('Data for {} is EMPTY'.format(team))
+                continue
+
+            team_used.append(team)
+        self.away_team_list = team_used
+        self.rating = self.initialize()
+        print(self.rating)
+        self.result = self.update_ratings(X)
+        print(self.result)
+
+    def initialize(self):
+        ratings = pd.DataFrame(
+            {'Team_1': self.home_team_list, 'Team_2': self.away_team_list})
+        ratings['HomeRatings'] = 1500
+        ratings['AwayRatings'] = 1500
+        return ratings
+
+    def update_ratings(self, X):
+        match_ratings = pd.DataFrame(columns=['HomeRatings', 'AwayRatings'])
+        for i in range(len(X)):
+            rating_h_team = 0
+            rating_a_team = 0
+            for team_h in self.home_team_list:
+                for team_a in self.away_team_list:
+                    if X.loc[i, team_h] == 1 and X.loc[i, team_a] == 1:
+                        rating_h_team = self.rating[self.rating['Team_1'].isin(
+                            [team_h])].index.values
+                        rating_h_team = rating_h_team[0]
+                        rating_a_team = self.rating[self.rating['Team_2'].isin(
+                            [team_a])].index.values
+                        rating_a_team = rating_a_team[0]
+            expect_h = self.compute_score(
+                self.rating.loc[rating_h_team, 'HomeRatings'], self.rating.loc[rating_a_team, 'AwayRatings'])
+            expect_a = self.compute_score(
+                self.rating.loc[rating_a_team, 'AwayRatings'], self.rating.loc[rating_h_team, 'HomeRatings'])
+            # print(expect_h)
+            # expect_a = 1-expect_h
+            if X.loc[i, 'FTR_H'] == 1:
+                adjust_h = 1
+                adjust_a = 0
+            elif X.loc[i, 'FTR_A'] == 1:
+                adjust_h = 0
+                adjust_a = 1
+            elif X.loc[i, 'FTR_D'] == 1:
+                adjust_h = 0.5
+                adjust_a = 0.5
+            self.rating.loc[rating_h_team, 'HomeRatings'] = self.rating.loc[rating_h_team, 'HomeRatings'] + \
+                self.compute_k(
+                    self.rating.loc[rating_h_team, 'HomeRatings']) * (adjust_h - expect_h)
+            self.rating.loc[rating_a_team, 'AwayRatings'] = self.rating.loc[rating_a_team, 'AwayRatings'] + \
+                self.compute_k(
+                    self.rating.loc[rating_a_team, 'AwayRatings']) * (adjust_a - expect_a)
+            add_data = pd.Series(
+                {'HomeRatings': self.rating.loc[rating_h_team, 'HomeRatings'], 'AwayRatings': self.rating.loc[rating_a_team, 'AwayRatings']})
+            match_ratings = match_ratings.append(add_data, ignore_index=True)
+        return match_ratings
+
+    def compute_k(self, rating):
+        if rating >= 2400:
+            return 16
+        elif rating >= 2100:
+            return 24
+        else:
+            return 36
+
+    def compute_score(self, rating1, rating2):
+        return 1 / (1+pow(10, (rating1 - rating2) / 600))
