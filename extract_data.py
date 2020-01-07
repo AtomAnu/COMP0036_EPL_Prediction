@@ -44,13 +44,14 @@ def format_data(training_file_name,test_file_name, additional_file_name=None):
 
     #convert all columns categorical features into multiple columns with the binary format
     #training and test data are combined
-    all_training_data = pd.concat([training_data_stripped.drop(columns=['Date']),
-                                   additional_file_data_stripped.drop(columns=['Date'])], sort=False)
-    training_and_test_binary = pd.get_dummies(pd.concat([all_training_data,
+    all_training_data = pd.concat([training_data_stripped,
+                                   additional_file_data_stripped], sort=False)
+
+    training_and_test_binary = pd.get_dummies(pd.concat([all_training_data.drop(columns=['Date']),
                                                          test_data_stripped.drop(columns=['Date'])], sort=False))
 
     #extract the training data
-    training_binary = training_and_test_binary.iloc[:len(all_training_data,:]
+    training_binary = training_and_test_binary.iloc[:len(all_training_data),:]
 
     #extract the test data
     test_binary = training_and_test_binary.iloc[len(all_training_data):,:]

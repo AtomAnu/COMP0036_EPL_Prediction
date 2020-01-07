@@ -9,7 +9,9 @@ import pandas as pd
 
 training_file_name = 'epl-training.csv'
 test_file_name = 'epl-test.csv'
-training_data, test_data = format_data(training_file_name, test_file_name)
+additional_file_name = 'data_updated.csv'
+training_data, test_data = format_data(training_file_name, test_file_name, additional_file_name)
+print(training_data)
 
 team_rating = Ratings(training_data)
 print(team_rating.rating)
