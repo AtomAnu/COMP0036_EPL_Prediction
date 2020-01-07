@@ -13,15 +13,8 @@ additional_file_name = 'data_updated.csv'
 training_data, test_data = format_data(training_file_name, test_file_name, additional_file_name)
 # training_data, test_data = format_data(training_file_name, test_file_name)
 
-<<<<<<< HEAD
-# team_rating = Ratings(training_data)
-# print(team_rating.rating)
-=======
 team_rating = Ratings(training_data)
 # print(team_rating.rating)
-
-training_data = pd.merge(training_data, team_rating)
->>>>>>> 4b823420422bf2edf29d09e777dd838aceb8ed2d
 
 group_8_y = ['FTHG']
 group_8_list = ['HF','HY','HR','FTHG']
