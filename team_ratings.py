@@ -5,6 +5,7 @@ class Ratings:
     def __init__(self, X):
         self.home_team_list = [col for col in X
                         if col.startswith('HomeTeam')]
+        h_team_used = []
         team_used = []
         for team in self.home_team_list:
             row_idx_list = []
@@ -15,12 +16,14 @@ class Ratings:
             if len(row_idx_list) == 0:
                 print('Data for {} is EMPTY'.format(team))
                 continue
+            h_team_used.append(team)
+            team_used.append(team.replace('HomeTeam_', ''))
 
-            team_used.append(team)
-        self.home_team_list = team_used
+        self.home_team_list = h_team_used
+        self.team_list = team_used
         self.away_team_list = [col for col in X
                         if col.startswith('AwayTeam')]
-        team_used = []
+        a_team_used = []
         for team in self.away_team_list:
             row_idx_list = []
             for row in range(X.shape[0]):
@@ -31,8 +34,8 @@ class Ratings:
                 print('Data for {} is EMPTY'.format(team))
                 continue
 
-            team_used.append(team)
-        self.away_team_list = team_used
+            a_team_used.append(team)
+        self.away_team_list = a_team_used
         self.rating = self.initialize()
         print(self.rating)
         self.result = self.update_ratings(X)
@@ -40,9 +43,8 @@ class Ratings:
 
     def initialize(self):
         ratings = pd.DataFrame(
-            {'Team_1': self.home_team_list, 'Team_2': self.away_team_list})
-        ratings['HomeRatings'] = 1500
-        ratings['AwayRatings'] = 1500
+            {'Team': self.team_list})
+        ratings['Ratings'] = 1500
         return ratings
 
     def update_ratings(self, X):
@@ -53,16 +55,16 @@ class Ratings:
             for team_h in self.home_team_list:
                 for team_a in self.away_team_list:
                     if X.loc[i, team_h] == 1 and X.loc[i, team_a] == 1:
-                        rating_h_team = self.rating[self.rating['Team_1'].isin(
-                            [team_h])].index.values
+                        rating_h_team = self.rating[self.rating['Team'].isin(
+                            [team_h.replace('HomeTeam_', '')])].index.values
                         rating_h_team = rating_h_team[0]
-                        rating_a_team = self.rating[self.rating['Team_2'].isin(
-                            [team_a])].index.values
+                        rating_a_team = self.rating[self.rating['Team'].isin(
+                            [team_a.replace('AwayTeam_', '')])].index.values
                         rating_a_team = rating_a_team[0]
             expect_h = self.compute_score(
-                self.rating.loc[rating_h_team, 'HomeRatings'], self.rating.loc[rating_a_team, 'AwayRatings'])
+                self.rating.loc[rating_h_team, 'Ratings'], self.rating.loc[rating_a_team, 'Ratings'])
             expect_a = self.compute_score(
-                self.rating.loc[rating_a_team, 'AwayRatings'], self.rating.loc[rating_h_team, 'HomeRatings'])
+                self.rating.loc[rating_a_team, 'Ratings'], self.rating.loc[rating_h_team, 'Ratings'])
 
             if X.loc[i, 'FTR_H'] == 1:
                 adjust_h = 1
@@ -73,24 +75,25 @@ class Ratings:
             elif X.loc[i, 'FTR_D'] == 1:
                 adjust_h = 0.5
                 adjust_a = 0.5
-            self.rating.loc[rating_h_team, 'HomeRatings'] = self.rating.loc[rating_h_team, 'HomeRatings'] + \
+            self.rating.loc[rating_h_team, 'Ratings'] = self.rating.loc[rating_h_team, 'Ratings'] + \
                 self.compute_k(
-                    self.rating.loc[rating_h_team, 'HomeRatings']) * (adjust_h - expect_h)
-            self.rating.loc[rating_a_team, 'AwayRatings'] = self.rating.loc[rating_a_team, 'AwayRatings'] + \
+                    self.rating.loc[rating_h_team, 'Ratings']) * (adjust_h - expect_h)
+            self.rating.loc[rating_a_team, 'Ratings'] = self.rating.loc[rating_a_team, 'Ratings'] + \
                 self.compute_k(
-                    self.rating.loc[rating_a_team, 'AwayRatings']) * (adjust_a - expect_a)
+                    self.rating.loc[rating_a_team, 'Ratings']) * (adjust_a - expect_a)
             add_data = pd.Series(
-                {'HomeRatings': self.rating.loc[rating_h_team, 'HomeRatings'], 'AwayRatings': self.rating.loc[rating_a_team, 'AwayRatings']})
+                {'HomeRatings': self.rating.loc[rating_h_team, 'Ratings'], 'AwayRatings': self.rating.loc[rating_a_team, 'Ratings']})
             match_ratings = match_ratings.append(add_data, ignore_index=True)
         return match_ratings
 
     def compute_k(self, rating):
         if rating >= 2400:
-            return 16
+            return 15
         elif rating >= 2100:
-            return 24
+            return 20
         else:
-            return 36
+            return 25
 
     def compute_score(self, rating1, rating2):
-        return 1 / (1+pow(10, (rating1 - rating2) / 600))
+        return 1 / (1+pow(10, (rating1 - rating2) / 400))
+    
