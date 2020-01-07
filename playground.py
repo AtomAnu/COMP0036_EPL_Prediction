@@ -11,10 +11,10 @@ training_file_name = 'epl-training.csv'
 test_file_name = 'epl-test.csv'
 additional_file_name = 'data_updated.csv'
 training_data, test_data = format_data(training_file_name, test_file_name, additional_file_name)
-print(training_data)
+# training_data, test_data = format_data(training_file_name, test_file_name)
 
 team_rating = Ratings(training_data)
-print(team_rating.rating)
+# print(team_rating.rating)
 
 training_data = pd.merge(training_data, team_rating)
 

@@ -41,12 +41,13 @@ def format_data(training_file_name,test_file_name, additional_file_name=None):
     test_data_stripped = load_file(test_file_name)
     if additional_file_name is not None:
         additional_file_data_stripped = load_file(additional_file_name)
+        all_training_data = pd.concat([training_data_stripped,
+                                       additional_file_data_stripped], sort=False, ignore_index=True)
+    else:
+        all_training_data = training_data_stripped
 
     #convert all columns categorical features into multiple columns with the binary format
     #training and test data are combined
-    all_training_data = pd.concat([training_data_stripped,
-                                   additional_file_data_stripped], sort=False)
-
     training_and_test_binary = pd.get_dummies(pd.concat([all_training_data.drop(columns=['Date']),
                                                          test_data_stripped.drop(columns=['Date'])], sort=False))
 
