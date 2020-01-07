@@ -11,13 +11,11 @@ training_file_name = 'epl-training.csv'
 test_file_name = 'epl-test.csv'
 training_data, test_data = format_data(training_file_name, test_file_name)
 
-team_rating = Ratings(training_data)
-print(team_rating.rating)
-
-training_data = pd.merge(training_data, team_rating)
+# team_rating = Ratings(training_data)
+# print(team_rating.rating)
 
 group_8_y = ['FTHG']
-group_8_list = ['FTR', 'HF','HY','HR','FTHG']
+group_8_list = ['HF','HY','HR','FTHG']
 group_8_binary_list = [col for col in training_data
                         for chosen_col in group_8_list if col.startswith(chosen_col)]
 group_8_data = training_data[group_8_binary_list]
@@ -46,6 +44,7 @@ for feature_name in feature_names:
             continue
         
         team_used.append(team)
+        
         # compare_regression_models(team, group_8_data.iloc[row_idx_list].drop(columns=group_8_y), group_8_data[group_8_y].iloc[row_idx_list])
         final_prediction = compare_classification_models(team, group_8_data.iloc[row_idx_list].drop(columns=group_8_y), group_8_data[group_8_y].iloc[row_idx_list])
         # print(final_prediction)
