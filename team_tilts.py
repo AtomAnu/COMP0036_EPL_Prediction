@@ -69,17 +69,15 @@ class Tilts:
                         tilt_a_team = tilt_a_team[0]
             # if self.expected_h_goals.loc[i]+self.expected_a_goals.loc[i] == 0:
             #     print(s+'s')
-            delta_h = self.compute_score(
-                self.tilt.loc[tilt_a_team, 'Tilts'], self.h_goals.loc[i]+self.a_goals.loc[i], self.expected_h_goals.loc[i]+self.expected_a_goals.loc[i])
-            # delta_a = self.compute_score(
-            #     self.tilt.loc[tilt_h_team, 'Tilts'], self.a_goals.loc[i], self.expected_a_goals.loc[i])
-            self.tilt.loc[tilt_h_team, 'Tilts'] = 0.98 * \
-                self.tilt.loc[tilt_h_team, 'Tilts'] + delta_h
-            self.tilt.loc[tilt_a_team, 'Tilts'] = 0.98 * \
-                self.tilt.loc[tilt_a_team, 'Tilts'] + delta_h
             add_data = pd.Series(
                 {'HomeTilts': self.tilt.loc[tilt_h_team, 'Tilts'], 'AwayTilts': self.tilt.loc[tilt_a_team, 'Tilts']})
             match_tilts = match_tilts.append(add_data, ignore_index=True)
+            delta = self.compute_score(
+                self.tilt.loc[tilt_a_team, 'Tilts'], self.h_goals.loc[i]+self.a_goals.loc[i], self.expected_h_goals.loc[i]+self.expected_a_goals.loc[i])
+            self.tilt.loc[tilt_h_team, 'Tilts'] = 0.98 * \
+                self.tilt.loc[tilt_h_team, 'Tilts'] + delta
+            self.tilt.loc[tilt_a_team, 'Tilts'] = 0.98 * \
+                self.tilt.loc[tilt_a_team, 'Tilts'] + delta     
         return match_tilts
             
     def compute_score(self, tilt, goals, expected_goals):
