@@ -27,7 +27,7 @@ def load_file(file_name):
 
     return data_stripped
 
-def format_data(training_file_name,test_file_name):
+def format_data(training_file_name,test_file_name, additional_file_name=None):
     """
     Format the loaded training and test data. Date column is formatted. Columns with categorical features are converted
     to multiple columns with the binary format.
@@ -39,24 +39,28 @@ def format_data(training_file_name,test_file_name):
     #load training and test files
     training_data_stripped = load_file(training_file_name)
     test_data_stripped = load_file(test_file_name)
+    if additional_file_name is not None:
+        additional_file_data_stripped = load_file(additional_file_name)
 
     #convert all columns categorical features into multiple columns with the binary format
     #training and test data are combined
-    training_and_test_binary = pd.get_dummies(pd.concat([training_data_stripped.drop(columns=['Date']),
+    all_training_data = pd.concat([training_data_stripped.drop(columns=['Date']),
+                                   additional_file_data_stripped.drop(columns=['Date'])], sort=False)
+    training_and_test_binary = pd.get_dummies(pd.concat([all_training_data,
                                                          test_data_stripped.drop(columns=['Date'])], sort=False))
 
     #extract the training data
-    training_binary = training_and_test_binary.iloc[:len(training_data_stripped),:]
+    training_binary = training_and_test_binary.iloc[:len(all_training_data,:]
 
     #extract the test data
-    test_binary = training_and_test_binary.iloc[len(training_data_stripped):,:]
+    test_binary = training_and_test_binary.iloc[len(all_training_data):,:]
     test_binary_columns = [col for col in training_and_test_binary
                            for original_col in list(test_data_stripped) if col.startswith(original_col)]
     test_binary = test_binary[test_binary_columns]
 
 
     #format the Date column
-    training_date_formatted = pd.DataFrame(pd.to_datetime(training_data_stripped.iloc[:,0]))
+    training_date_formatted = pd.DataFrame(pd.to_datetime(all_training_data.iloc[:,0]))
     test_date_formatted = pd.DataFrame(pd.to_datetime(test_data_stripped.iloc[:,0]))
 
     #combine the Date column with the rest
