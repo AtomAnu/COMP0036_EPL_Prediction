@@ -146,6 +146,14 @@ def compare_regression_models(team_name, X_data, y_data):
 
 def compare_classification_models(team_name, X_data, y_data):
 
+    if team_name.startswith('HomeTeam'):
+        col_temp = 'ExpectedHGoals'
+    elif team_name.startswith('AwayTeam'):
+        col_temp = 'ExpectedAGoals'
+
+    index_temp = X_data.index.values
+    print(index_temp)
+
     classifiers = {
         'Logistic Regression': LogisticRegression(),
         'Gaussian Naive Bayes': GaussianNB(),
@@ -154,22 +162,31 @@ def compare_classification_models(team_name, X_data, y_data):
     }
 
     loo = LeaveOneOut()
-    
+
     team_obj = Team(team_name, X_data, y_data)
     X_all_temp = team_obj.X_all
     y_temp = team_obj.y
     y_temp.index = range(len(y_temp))
     final_prediction = []
-    final_score = []
+    final_score =[]
  
     r_name = []
 
     for index, (name, classifier) in enumerate(classifiers.items()):
-        y_pred = []
+        y_pred = pd.DataFrame(columns=[col_temp], index=index_temp)
+        print(y_pred)
         for train_idx, test_idx in loo.split(team_obj.X_all):
             classifier.fit(X_all_temp[train_idx], y_temp.loc[train_idx])
-            y_pred.append(classifier.predict(X_all_temp[test_idx]))
-        final_prediction.append(np.array(y_pred).ravel())
+            data_temp = classifier.predict(X_all_temp[test_idx])
+            # add_data = pd.Series(
+            #     {col_temp: data_temp[0]})
+            # y_pred = y_pred.append(add_data, ignore_index=True)
+            y_pred.loc[index_temp[test_idx], col_temp] = data_temp[0]
+
+        # final_prediction.append(np.array(y_pred).ravel())
+        print(y_pred)
+
+        final_prediction.append(y_pred)
         # classifier.fit(team_obj.X_train, team_obj.y_train)
         # y_pred = classifier.predict(team_obj.X_test)
         # final_prediction.append(y_pred)
