@@ -36,6 +36,8 @@ class Ratings:
 
             a_team_used.append(team)
         self.away_team_list = a_team_used
+        self.h_tilt = X['HomeTilts']
+        self.a_tilt = X['AwayTilts']
         self.rating = self.initialize()
         print(self.rating)
         self.result = self.update_ratings(X)
@@ -76,23 +78,25 @@ class Ratings:
                 adjust_h = 0.5
                 adjust_a = 0.5
             self.rating.loc[rating_h_team, 'Ratings'] = self.rating.loc[rating_h_team, 'Ratings'] + \
-                self.compute_k(
-                    self.rating.loc[rating_h_team, 'Ratings']) * (adjust_h - expect_h)
+                self.compute_k(i, 'Home') * (adjust_h - expect_h)
             self.rating.loc[rating_a_team, 'Ratings'] = self.rating.loc[rating_a_team, 'Ratings'] + \
-                self.compute_k(
-                    self.rating.loc[rating_a_team, 'Ratings']) * (adjust_a - expect_a)
+                self.compute_k(i, 'Away') * (adjust_a - expect_a)
             add_data = pd.Series(
                 {'HomeRatings': self.rating.loc[rating_h_team, 'Ratings'], 'AwayRatings': self.rating.loc[rating_a_team, 'Ratings']})
             match_ratings = match_ratings.append(add_data, ignore_index=True)
         return match_ratings
 
-    def compute_k(self, rating):
-        if rating >= 2400:
-            return 15
-        elif rating >= 2100:
-            return 20
-        else:
-            return 25
+    def compute_k(self, nrow, label):
+        # if rating >= 2400:
+        #     return 15
+        # elif rating >= 2100:
+        #     return 20
+        # else:
+        #     return 25
+        if label == 'Home':
+            return 20 * self.h_tilt.loc[nrow]
+        elif label == 'Away':
+            return 20 * self.a_tilt.loc[nrow]
 
     def compute_score(self, rating1, rating2):
         return 1 / (1+pow(10, (rating1 - rating2) / 400))
