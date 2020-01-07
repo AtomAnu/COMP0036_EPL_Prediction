@@ -63,6 +63,9 @@ class Ratings:
                         rating_a_team = self.rating[self.rating['Team'].isin(
                             [team_a.replace('AwayTeam_', '')])].index.values
                         rating_a_team = rating_a_team[0]
+            add_data = pd.Series(
+                {'HomeRatings': self.rating.loc[rating_h_team, 'Ratings'], 'AwayRatings': self.rating.loc[rating_a_team, 'Ratings']})
+            match_ratings = match_ratings.append(add_data, ignore_index=True)
             expect_h = self.compute_score(
                 self.rating.loc[rating_h_team, 'Ratings'], self.rating.loc[rating_a_team, 'Ratings'])
             expect_a = self.compute_score(
@@ -81,9 +84,6 @@ class Ratings:
                 self.compute_k(i, 'Home') * (adjust_h - expect_h)
             self.rating.loc[rating_a_team, 'Ratings'] = self.rating.loc[rating_a_team, 'Ratings'] + \
                 self.compute_k(i, 'Away') * (adjust_a - expect_a)
-            add_data = pd.Series(
-                {'HomeRatings': self.rating.loc[rating_h_team, 'Ratings'], 'AwayRatings': self.rating.loc[rating_a_team, 'Ratings']})
-            match_ratings = match_ratings.append(add_data, ignore_index=True)
         return match_ratings
 
     def compute_k(self, nrow, label):
