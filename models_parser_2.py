@@ -11,19 +11,22 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
+from sklearn.metrics import confusion_matrix
 from sklearn.metrics import f1_score
 from sklearn.metrics import plot_confusion_matrix
 
 from sklearn.model_selection import train_test_split
 
-class Data():
+from neural_network import Metrics, Neural_Network
+
+class Data:
     def __init__(self, X, y):
         self.X_all = X
         self.y_all = y
         self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(
-            X, y, test_size=0.2, random_state=42)
+            X, y, test_size=0.2, random_state=100)
 
-class Compare():
+class Compare:
     def __init__(self, X, y):
         self.accuracies = pd.DataFrame(columns=['Models', 'Accuracies'])
         self.data = Data(X, y)
@@ -70,7 +73,6 @@ class Compare():
     def tryLR(self):
         # defining parameter range
         param_grid = {'C': [0.000001, 0.00001, 0.0001, 0.001, 0.01, 0.1, 1, 10]}
-
 
         grid = GridSearchCV(LogisticRegression(multi_class="ovr", solver="sag",
                                                max_iter=4000),
@@ -156,4 +158,26 @@ class Compare():
         self.get_cross_val_score(
             knn, 'k-Nearest Neighbor', self.data.X_all, self.data.y_all)
     
-    
+    def tryNN(self, f1):
+        X_train_1, X_test_1, y_train_1, y_test_1 = train_test_split(self.data.X_all, self.data.y_all,
+                                                                test_size=0.2,
+                                                                random_state=100)
+        nn = Neural_Network(self.data.X_all.shape[1], self.data.y_all.shape[1])
+        es = EarlyStopping(monitor='val_accuracy',
+                           mode='max', verbose=1, patience=50)
+        train = nn.model.fit(X_train_1, y_train_1, batch_size=64,
+                                  epochs=500, verbose=0,
+                                  validation_data=(X_test_1, y_test_1), callbacks=[es])
+        print(train.history.keys())
+        result = nn.model.evaluate(self.data.X_test, self.data.y_test)
+        print("==================================")
+        print("Result on the testing set")
+        print("F1 score value: " + str(result[1] * 100))
+        print("Accuracy: " + str(result[2]))
+        print("==================================\n")
+
+        y_pred = nn.model.predict(self.data.X_test)
+        nn_confusion_matrix = confusion_matrix(
+            self.data.y_test, y_pred, labels=['H', 'D', 'A'])
+        # plot confusion matrix
+        
