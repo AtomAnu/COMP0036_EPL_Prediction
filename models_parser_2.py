@@ -43,7 +43,7 @@ class Compare:
 
     def classifier_score(self, classifier, X, y):
         y_pred = classifier.predict(X)
-        return f1_score(X, y_pred, pos_label=1, average='macro'), sum(X == y_pred) / float(len(y_pred))
+        return f1_score(y, y_pred, pos_label=1, average='macro'), sum(y == y_pred) / float(len(y_pred))
 
     def print_result(self, f1, acc, label):
         print("==================================")
