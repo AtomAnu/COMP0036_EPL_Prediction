@@ -2,7 +2,6 @@ from keras.models import Sequential
 from keras.layers import Dense, Dropout
 from keras.optimizers import Adam
 from keras.optimizers import RMSprop
-from keras.utils import to_categorical
 from keras import backend as K
 from keras import regularizers
 from sklearn import preprocessing
@@ -65,8 +64,7 @@ class Neural_Network:
         model.add(Dense(16, activation='sigmoid',
                         kernel_regularizer=regularizers.l1(0.01)))
         model.add(Dense(self.size_o, activation='softmax'))
-        model.compile(loss='mean_squared_error',
+        model.compile(loss='categorical_crossentropy',
                       optimizer=self.optimizer, metrics=['accuracy', f1])
         model.summary()
         return model
-
