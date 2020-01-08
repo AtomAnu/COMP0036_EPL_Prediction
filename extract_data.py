@@ -27,7 +27,7 @@ def load_file(file_name):
 
     return data_stripped
 
-def format_data(training_file_name,test_file_name, additional_file_name=None):
+def format_data(training_file_name,test_file_name,additional_file_name=None):
     """
     Format the loaded training and test data. Date column is formatted. Columns with categorical features are converted
     to multiple columns with the binary format.
@@ -45,6 +45,9 @@ def format_data(training_file_name,test_file_name, additional_file_name=None):
                                        additional_file_data_stripped], sort=False, ignore_index=True)
     else:
         all_training_data = training_data_stripped
+
+    all_training_data['FTR'] = all_training_data['FTR'].map({'H': 1, 'D': 2, 'A': 3})
+    all_training_data['HTR'] = all_training_data['HTR'].map({'H': 1, 'D': 2, 'A': 3})
 
     #convert all columns categorical features into multiple columns with the binary format
     #training and test data are combined
@@ -101,3 +104,34 @@ def get_twenty_latest_team_matches(team_name, data_frame, row_idx):
             twenty_matches_row_idx_list = row_idx_list[row_idx_list.index(row_idx)-20:row_idx_list.index(row_idx)]
 
     return data_frame.iloc[twenty_matches_row_idx_list]
+
+def non_shot_feature_selection(training_data,team_ratings_data):
+    """
+    Select features that have correlation values above the defined threshold.
+
+    :param training_data: DataFrame containing the training data
+    :param team_ratings_data: Data containing the ratings of the home and away teams at each match
+    :return: an array containing names of the selected feature
+    """
+
+    data = pd.concat([training_data,team_ratings_data],axis=1)
+    column_heads_to_drop = ['HomeTeam', 'AwayTeam', 'Date', 'Referee', 'FTHG', 'FTAG', 'HTHG', 'HTAG', 'HS', 'AS',
+                            'HST', 'AST']
+    all_columns_to_drop = [col for col in data
+                           for chosen_col in column_heads_to_drop if col.startswith(chosen_col)]
+
+    data = data.drop(columns=all_columns_to_drop)
+
+    corrmat = data.corr()
+    FTR_corr = corrmat.loc['FTR'].abs().drop('FTR')
+    feature_corr_thershold = 0.05
+    selected_features_idx = [row for row in range(FTR_corr.shape[0]) if FTR_corr[row] >= feature_corr_thershold]
+    selected_features = FTR_corr[selected_features_idx].index.values
+
+    return selected_features
+
+# ratings_data = load_file('Data.csv')
+# ratings_data = ratings_data[['HomeRatings','AwayRatings']]
+# data, test = format_data('epl-training.csv','epl-test.csv','data_updated.csv')
+#
+# selected_features = non_shot_feature_selection(data,ratings_data)
