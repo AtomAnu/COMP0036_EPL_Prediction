@@ -201,29 +201,31 @@ class Compare:
         print("==================================\n")
 
         y_pred = nn.model.predict(self.data.X_test)
-        nn_confusion_matrix = confusion_matrix(
+        nn_cm = confusion_matrix(
             self.data.y_test, to_result(y_pred), labels=[1, 2, 3])
-        print(nn_confusion_matrix)
-        fig, ax = plot_confusion_matrix_2(conf_mat=nn_confusion_matrix,
+        print(nn_cm)
+        fig, ax = plot_confusion_matrix_2(conf_mat=nn_cm,
                                         colorbar=True,
                                         show_absolute=False,
                                         show_normed=True)
         # plot confusion matrix
+        plt.show()
 
         es_2 = EarlyStopping(monitor='loss', mode='min', verbose=1, patience=20)
         #because we are using cross validation, no val set is used, so we early stop using the training
         #loss metrics,but we set the epochs to 150, because the loss function turns to be stable
         kfold = StratifiedKFold(n_splits=5, shuffle=True, random_state=100)
         cross_val = []
-        for train, test in kfold.split(self.data.X_all, to_categorical(self.data.y_all)[:, [1, 2, 3]]):
+        for train, test in kfold.split(self.data.X_all, self.data.y_all):
             nn_temp = Neural_Network(
                 self.data.X_all.shape[1], len(self.data.y_all.unique()))
             #standardised input
-            train_history = nn_temp.model.fit(self.data.X_all.loc[train], to_categorical(self.data.y_all.loc[train])[:, [1, 2, 3]],
+            train_history = nn_temp.model.fit(self.data.X_all.loc[train], to_categorical(
+                self.data.y_all)[:, [1, 2, 3]][train],
                                             batch_size=64, verbose=0, epochs=150,
                                             callbacks=[es_2])
             val_history = nn_temp.model.evaluate(
-                self.data.X_all.loc[test], to_categorical(self.data.y_all.loc[test])[:, [1, 2, 3]], verbose=0)
+                self.data.X_all.loc[test], to_categorical(self.data.y_all)[:, [1, 2, 3]][test], verbose = 0)
             print("%s: %.2f%%" % (nn_temp.model.metrics[0], val_history[1]*100))
             cross_val.append(val_history[1])
         print("%.2f%% (+/- %.2f%%)" %
@@ -231,14 +233,14 @@ class Compare:
         self.update_accuracies('Neural Network', np.average(cross_val))
         
     def get_best_model(self):
-        # self.tryLR()
-        # self.trySVM()
-        # self.tryGNB()
-        # self.trykNN()
+        self.tryLR()
+        self.trySVM()
+        self.tryGNB()
+        self.trykNN()
         self.tryNN()
         print(self.accuracies)
-        # models = ['LR', 'SVM', 'GNB', 'KNN', 'NN']
-        models = ['LR', 'GNB', 'KNN', 'NN']
+        models = ['LR', 'SVM', 'GNB', 'KNN', 'NN']
+        # models = ['LR', 'GNB', 'KNN', 'NN']
         plt.bar(models, np.array(self.accuracies))
         plt.title('Accuracy Comparison')
         plt.xlabel('model')
