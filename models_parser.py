@@ -15,6 +15,14 @@ import matplotlib.pyplot as plt
 
 def compare_regression_models(team_name, X_data, y_data):
 
+    if team_name.startswith('HomeTeam'):
+        col_temp = 'ExpectedHGoals'
+    elif team_name.startswith('AwayTeam'):
+        col_temp = 'ExpectedAGoals'
+
+    index_temp = X_data.index.values
+    print(index_temp)
+
     degrees = range(1,15)
     alphas = [1e-20, 1e-15, 1e-8, 1e-4, 1e-3, 1e-2, 0.1, 5, 20, 1000]
 
@@ -26,14 +34,19 @@ def compare_regression_models(team_name, X_data, y_data):
         'Linear Regression': LinearRegression()
     }
 
-    final_score = []
+    team_obj = Team(team_name, X_data, y_data)
+    X_all_temp = team_obj.X_all
+    y_temp = team_obj.y
+    y_temp.index = range(len(y_temp))
     final_prediction = []
-    y_pred = []
+    final_score = []
+    
     r_name = []
 
     for index, (name, regression) in enumerate(regressions.items()):
         val_errors_degree = []
         val_errors_alpha = []
+        y_pred = pd.DataFrame(columns=[col_temp], index=index_temp)
 
         for degree in degrees:
             team_obj = Team(team_name, X_data, y_data, degree=degree)
@@ -54,11 +67,9 @@ def compare_regression_models(team_name, X_data, y_data):
             #                team_obj_reg.y_train)
             
             for train_idx, test_idx in loo.split(team_obj_reg.X_all):
-                X_all_temp = team_obj_reg.X_all
-                y_temp = team_obj_reg.y
-                y_temp.index = range(len(y_temp))
                 regression.fit(X_all_temp[train_idx], y_temp.loc[train_idx])
-                y_pred.append(regression.predict(X_all_temp[test_idx]))
+                data_temp = regression.predict(X_all_temp[test_idx])
+                y_pred.loc[index_temp[test_idx], col_temp] = data_temp[0]
             
             final_prediction.append(y_pred)
             # y_pred = regression.predict(team_obj_reg.X_test)
@@ -89,11 +100,9 @@ def compare_regression_models(team_name, X_data, y_data):
             #                team_obj_reg.y_train)
             
             for train_idx, test_idx in loo.split(team_obj_reg.X_all):
-                X_all_temp = team_obj_reg.X_all
-                y_temp = team_obj_reg.y
-                y_temp.index = range(len(y_temp))
                 regression.fit(X_all_temp[train_idx], y_temp.loc[train_idx])
-                y_pred.append(regression.predict(X_all_temp[test_idx]))
+                data_temp = regression.predict(X_all_temp[test_idx])
+                y_pred.loc[index_temp[test_idx], col_temp] = data_temp[0]
 
             final_prediction.append(y_pred)
 
@@ -114,11 +123,9 @@ def compare_regression_models(team_name, X_data, y_data):
             #                team_obj_reg.y_train)
             
             for train_idx, test_idx in loo.split(team_obj_reg.X_all):
-                X_all_temp = team_obj_reg.X_all
-                y_temp = team_obj_reg.y
-                y_temp.index = range(len(y_temp))
                 regression.fit(X_all_temp[train_idx], y_temp.loc[train_idx])
-                y_pred.append(regression.predict(X_all_temp[test_idx]))
+                data_temp = regression.predict(X_all_temp[test_idx])
+                y_pred.loc[index_temp[test_idx], col_temp] = data_temp[0]
 
             final_prediction.append(y_pred)
 
@@ -174,22 +181,13 @@ def compare_classification_models(team_name, X_data, y_data):
 
     for index, (name, classifier) in enumerate(classifiers.items()):
         y_pred = pd.DataFrame(columns=[col_temp], index=index_temp)
-        print(y_pred)
+        # print(y_pred)
         for train_idx, test_idx in loo.split(team_obj.X_all):
             classifier.fit(X_all_temp[train_idx], y_temp.loc[train_idx])
             data_temp = classifier.predict(X_all_temp[test_idx])
-            # add_data = pd.Series(
-            #     {col_temp: data_temp[0]})
-            # y_pred = y_pred.append(add_data, ignore_index=True)
             y_pred.loc[index_temp[test_idx], col_temp] = data_temp[0]
 
-        # final_prediction.append(np.array(y_pred).ravel())
-        print(y_pred)
-
         final_prediction.append(y_pred)
-        # classifier.fit(team_obj.X_train, team_obj.y_train)
-        # y_pred = classifier.predict(team_obj.X_test)
-        # final_prediction.append(y_pred)
         score_temp = classifier.score(team_obj.X_test, team_obj.y_test)
         final_score.append(score_temp)
         r_name.append(name)
