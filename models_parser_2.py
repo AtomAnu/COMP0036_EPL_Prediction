@@ -188,6 +188,8 @@ class Compare:
         nn_confusion_matrix = confusion_matrix(
             self.data.y_test, y_pred, labels=[1, 2, 3])
         print(nn_confusion_matrix)
+        print(y_pred)
+        print(s)
         # plot confusion matrix
 
         es_2 = EarlyStopping(monitor='loss', mode='min', verbose=1, patience=20)
@@ -211,10 +213,10 @@ class Compare:
         self.update_accuracies('Neural Network', np.average(cross_val))
         
     def get_best_model(self):
-        self.tryLR()
+        # self.tryLR()
         # self.trySVM()
-        self.tryGNB()
-        self.trykNN()
+        # self.tryGNB()
+        # self.trykNN()
         self.tryNN()
         print(self.accuracies)
         # models = ['LR', 'SVM', 'GNB', 'KNN', 'NN']
