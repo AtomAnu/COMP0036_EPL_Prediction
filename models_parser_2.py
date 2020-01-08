@@ -30,9 +30,11 @@ class Compare:
     def __init__(self, X, y):
         self.accuracies = pd.DataFrame(columns=['Models', 'Accuracies'])
         self.data = Data(X, y)
+        self.best_models = []
+        self.best_model = self.get_best_model()
 
     def update_accuracies(self, model_name, accuracy):
-        add_data = pd.Series({model_name: accuracy})
+        add_data = pd.Series({'Models': model_name, 'Accuracies': accuracy})
         self.accuracies = self.accuracies.append(add_data, ignore_index=True)
 
     def classifier_train(self, classifier, X, y):
@@ -86,6 +88,7 @@ class Compare:
         print(grid.best_params_)
         # print how our model looks after hyper-parameter tuning
         lr = grid.best_estimator_
+        self.best_models.append(lr)
         end = time()
         print(end - start)
 
@@ -107,15 +110,15 @@ class Compare:
                       'gamma': [1, 0.1, 0.01, 0.001, 0.0001],
                       'kernel': ['linear', 'rbf', 'sigmoid']}
 
-        grid = GridSearchCV(svm.SVC(), param_grid, refit=True, verbose=3, cv=5)
+        grid = GridSearchCV(svm.SVC(), param_grid, refit=True, verbose=2, cv=5)
 
         # fitting the model for grid search
         grid.fit(self.data.X_all, self.data.y_all)
         # print best parameter after tuning
         print(grid.best_params_)
-
         # print how our model looks after hyper-parameter tuning
         gsvm = grid.best_estimator_
+        self.best_models.append(gsvm)
 
         self.classifier_train(gsvm, self.data.X_train, self.data.y_train)
         f1, acc = self.classifier_score(gsvm, self.data.X_test, self.data.y_test)
@@ -134,6 +137,7 @@ class Compare:
         
     def tryGNB(self):
         gnb = GaussianNB()
+        self.best_models.append(gnb)
         self.classifier_train(gnb, self.data.X_train, self.data.y_train)
         f1, acc = self.classifier_score(
             gnb, self.data.X_test, self.data.y_test)
@@ -147,6 +151,7 @@ class Compare:
 
     def trykNN(self):
         knn = KNeighborsClassifier()
+        self.best_models.append(knn)
         self.classifier_train(knn, self.data.X_train, self.data.y_train)
         f1, acc = self.classifier_score(
             knn, self.data.X_test, self.data.y_test)
@@ -181,3 +186,10 @@ class Compare:
             self.data.y_test, y_pred, labels=['H', 'D', 'A'])
         # plot confusion matrix
         
+    def get_best_model(self):
+        # self.tryLR()
+        # self.trySVM()
+        self.tryGNB()
+        self.trykNN()
+        print(self.accuracies)
+        return self.best_models[np.argmax(np.array(self.accuracies['Accuracies']))]
