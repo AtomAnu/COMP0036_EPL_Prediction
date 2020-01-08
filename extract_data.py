@@ -130,8 +130,17 @@ def non_shot_feature_selection(training_data,team_ratings_data):
 
     return selected_features
 
-# ratings_data = load_file('Data.csv')
-# ratings_data = ratings_data[['HomeRatings','AwayRatings']]
-# data, test = format_data('epl-training.csv','epl-test.csv','data_updated.csv')
-#
-# selected_features = non_shot_feature_selection(data,ratings_data)
+ratings_data = load_file('Data.csv')
+ratings_data = ratings_data[['HomeRatings','AwayRatings']]
+data, test = format_data('epl-training.csv','epl-test.csv','data_updated.csv')
+
+selected_features = non_shot_feature_selection(data,ratings_data)
+
+from models_parser_2 import Compare
+
+models_comparison_obj = Compare(pd.concat([data,ratings_data],axis=1)[selected_features],data['FTR'])
+models_comparison_obj.tryLR()
+models_comparison_obj.tryGNB()
+models_comparison_obj.trySVM()
+models_comparison_obj.trykNN()
+print(models_comparison_obj.accuracies)
