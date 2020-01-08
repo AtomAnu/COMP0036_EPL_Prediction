@@ -139,8 +139,8 @@ selected_features = non_shot_feature_selection(data,ratings_data)
 from models_parser_2 import Compare
 
 models_comparison_obj = Compare(pd.concat([data,ratings_data],axis=1)[selected_features],data['FTR'])
-models_comparison_obj.tryLR()
-models_comparison_obj.tryGNB()
-models_comparison_obj.trySVM()
-models_comparison_obj.trykNN()
-print(models_comparison_obj.accuracies)
+# models_comparison_obj.tryLR()
+# models_comparison_obj.tryGNB()
+# models_comparison_obj.trySVM()
+# models_comparison_obj.trykNN()
+# print(models_comparison_obj.accuracies)
