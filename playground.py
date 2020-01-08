@@ -20,11 +20,7 @@ training_data, test_data = format_data(training_file_name, test_file_name, addit
 # group_8_binary_list = [col for col in training_data
 #                         for chosen_col in group_8_list if col.startswith(chosen_col)]
 # group_8_data = training_data[group_8_binary_list]
-team_rating = Ratings(training_data)
-# training_data = pd.concat(
-#         [training_data, team_rating.result], axis=1, ignore_index=False)
 
-print(s+'s')
 # training_data = pd.read_csv('/Users/Manny/Desktop/Data.csv')
 # print(training_data)
 # team_rating = Ratings(training_data)
