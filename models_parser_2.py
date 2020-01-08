@@ -105,7 +105,7 @@ class Compare:
         # defining parameter range
         param_grid = {'C': [0.01, 0.1, 1, 10, 100, 1000],
                       'gamma': [1, 0.1, 0.01, 0.001, 0.0001],
-                      'kernel': ['linear', 'poly', 'rbf', 'sigmoid']}
+                      'kernel': ['linear', 'rbf', 'sigmoid']}
 
         grid = GridSearchCV(svm.SVC(), param_grid, refit=True, verbose=3, cv=5)
 
