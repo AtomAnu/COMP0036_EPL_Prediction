@@ -59,7 +59,11 @@ class Neural_Network:
 
     def generate_model(self):
         model = Sequential()
-        model.add(Dense(32, input_dim=self.size_i, activation='relu'))
+        model.add(Dense(64, input_dim=self.size_i, activation='relu'))
+        model.add(Dense(32, activation='relu',
+                        kernel_regularizer=regularizers.l2(0.01)))
+        model.add(Dense(16, activation='sigmoid',
+                        kernel_regularizer=regularizers.l1(0.01)))
         model.add(Dense(self.size_o, activation='softmax'))
         model.compile(loss='mean_squared_error',
                       optimizer=self.optimizer, metrics=['accuracy', f1])
