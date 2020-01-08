@@ -54,7 +54,7 @@ class Neural_Network:
         model = Sequential()
         model.add(Dense(32, input_dim=self.size_i, activation='relu'))
         model.add(Dense(self.size_o, activation='softmax'))
-        model.complie(loss='categorical_crossentropy',
+        model.compile(loss='categorical_crossentropy',
                       optimizer=self.optimizer, metrics=['accuracy', f1])
         model.summary()
         return model
