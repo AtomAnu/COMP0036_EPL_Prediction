@@ -70,3 +70,34 @@ def format_data(training_file_name,test_file_name, additional_file_name=None):
     test_data_formatted = pd.concat([test_date_formatted, test_binary], axis=1)
 
     return training_data_formatted, test_data_formatted
+
+def get_twenty_latest_team_matches(team_name, data_frame, row_idx):
+    """
+    Find the latest twenty matches for the specified team.
+    -> If the specified row index for the current match is not included
+       in the row indices of all the matches, the latest 20 matches of
+       all the matches would be returned
+    -> If the number of previous matches
+       is less than 20, the method would return all previous matches.
+
+    :param team_name: specified team name (e.g. 'HomeTeam_Arsenal', 'AwayTeam_Cardiff', etc.)
+    :param data_frame: DataFrame containing all the matches for all the teams
+    :param row_index: row index of the current match of interest
+    :return: DataFrame with the latest 20 matches
+    """
+
+    row_idx_list = []
+    for row in range(data_frame.shape[0]):
+        if data_frame.loc[row, team_name] == 1:
+            row_idx_list.append(row)
+
+    if row_idx not in row_idx_list:
+        twenty_matches_row_idx_list = row_idx_list[len(row_idx_list)-20:]
+    else:
+        number_of_previous_matches = len(row_idx_list[:row_idx_list.index(row_idx)])
+        if number_of_previous_matches < 20:
+            twenty_matches_row_idx_list = row_idx_list[:row_idx_list.index(row_idx)]
+        else:
+            twenty_matches_row_idx_list = row_idx_list[row_idx_list.index(row_idx)-20:row_idx_list.index(row_idx)]
+
+    return data_frame.iloc[twenty_matches_row_idx_list]
