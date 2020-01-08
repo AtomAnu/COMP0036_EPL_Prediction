@@ -1,5 +1,8 @@
 from sklearn.linear_model import LogisticRegression
 from sklearn import svm
+from sklearn.naive_bayes import GaussianNB
+from sklearn.neighbors import KNeighborsClassifier
+
 from time import time
 
 from sklearn.model_selection import cross_val_score
@@ -90,7 +93,7 @@ class Compare():
         f1, acc = self.classifier_score(lr, self.data.X_train, self.data.y_train)
         self.print_result(f1, acc, 'training')
 
-        self.get_cross_val_score(lr, 'LogisticRegression', self.data.X_all, self.data.y_all)
+        self.get_cross_val_score(lr, 'Logistic Regression', self.data.X_all, self.data.y_all)
 
         class_name = ['A', 'D', 'H']
         title = "Confusion matrix with normalization"
@@ -99,8 +102,8 @@ class Compare():
     def trySVM(self):
         # defining parameter range
         param_grid = {'C': [0.01, 0.1, 1, 10, 100, 1000],
-                    'gamma': [1, 0.1, 0.01, 0.001, 0.0001],
-                    'kernel': ['rbf']}
+                      'gamma': [1, 0.1, 0.01, 0.001, 0.0001],
+                      'kernel': ['linear', 'poly', 'rbf', 'sigmoid']}
 
         grid = GridSearchCV(svm.SVC(), param_grid, refit=True, verbose=3, cv=5)
 
@@ -120,9 +123,37 @@ class Compare():
         self.print_result(f1, acc, 'training')
 
         self.get_cross_val_score(
-            gsvm, 'LogisticRegression', self.data.X_all, self.data.y_all)
+            gsvm, 'Support Vector Machine', self.data.X_all, self.data.y_all)
 
         class_name = ['A', 'D', 'H']
         title = "Confusion matrix with normalization"
         self.plot_confusion(gsvm, class_name, self.data.X_test,
                             self.data.y_test, title)
+        
+    def tryGNB(self):
+        gnb = GaussianNB()
+        self.classifier_train(gnb, self.data.X_train, self.data.y_train)
+        f1, acc = self.classifier_score(
+            gnb, self.data.X_test, self.data.y_test)
+        self.print_result(f1, acc, 'testing')
+        f1, acc = self.classifier_score(
+            gnb, self.data.X_train, self.data.y_train)
+        self.print_result(f1, acc, 'training')
+
+        self.get_cross_val_score(
+            gnb, 'Guassian Naive Bayesian', self.data.X_all, self.data.y_all)
+
+    def trykNN(self):
+        knn = KNeighborsClassifier()
+        self.classifier_train(knn, self.data.X_train, self.data.y_train)
+        f1, acc = self.classifier_score(
+            knn, self.data.X_test, self.data.y_test)
+        self.print_result(f1, acc, 'testing')
+        f1, acc = self.classifier_score(
+            knn, self.data.X_train, self.data.y_train)
+        self.print_result(f1, acc, 'training')
+
+        self.get_cross_val_score(
+            knn, 'k-Nearest Neighbor', self.data.X_all, self.data.y_all)
+    
+    
