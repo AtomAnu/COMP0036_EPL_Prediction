@@ -209,7 +209,7 @@ class Compare:
                                         show_absolute=False,
                                         show_normed=True)
         # plot confusion matrix
-        print(s)
+
         es_2 = EarlyStopping(monitor='loss', mode='min', verbose=1, patience=20)
         #because we are using cross validation, no val set is used, so we early stop using the training
         #loss metrics,but we set the epochs to 150, because the loss function turns to be stable
