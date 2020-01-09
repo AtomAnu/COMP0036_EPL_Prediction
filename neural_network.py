@@ -4,6 +4,7 @@ from keras.optimizers import Adam
 from keras import backend as K
 from keras import regularizers
 
+# f1 score metric for the neural network
 def f1(y_true, y_pred):
     def recall(y_true, y_pred):
         """Recall metric.
@@ -46,18 +47,17 @@ class Neural_Network:
                               beta_2=self.beta_2, decay=self.decay)
         self.model = self.generate_model()
 
-    def generate_model(self):
+    # build the neural network
+    def generate_model(self): 
         model = Sequential()
         model.add(Dense(16, input_dim=self.size_i, activation='relu'))
-        # model.add(Dense(32, activation='relu'))
         model.add(Dense(32, activation='relu',
                         kernel_regularizer=regularizers.l2(0.01)))
-        # model.add(Dense(32, activation='relu',
-        #                 kernel_regularizer=regularizers.l2(0.01)))
         model.add(Dense(16, activation='sigmoid',
                         kernel_regularizer=regularizers.l1(0.01)))
         model.add(Dense(self.size_o, activation='softmax'))
         model.compile(loss='categorical_crossentropy',
                       optimizer=self.optimizer, metrics=['accuracy', f1])
+        # show the model built above
         model.summary()
         return model

@@ -29,10 +29,20 @@ class Data:
     def __init__(self, X, y):
         self.X_all = X
         self.y_all = y
+        # seperate training and test set
         self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(
             X, y, test_size=0.2, random_state=100)
 
 class Compare:
+    """
+    Class do the model comparision
+
+    accuracies: DataFrame containing models' names and their accuracies
+    data: Data containing training and test data
+    best_models: list containing the best model for different classifier
+    best_idx: Int number storing the index of the best model in best_models
+    best_model: Best classifier
+    """
     def __init__(self, X, y):
         self.accuracies = pd.DataFrame(columns=['Models', 'Accuracies'])
         self.data = Data(X, y)
@@ -50,6 +60,7 @@ class Compare:
         end = time()
         print("Training time: {}".format(end - start))
 
+    # calculate the F1 and accuracy for the classifier
     def classifier_score(self, classifier, X, y):
         y_pred = classifier.predict(X)
         return f1_score(y, y_pred, pos_label=1, average='macro'), sum(y == y_pred) / float(len(y_pred))
@@ -80,20 +91,20 @@ class Compare:
         plt.show()
 
     def tryLR(self):
-        # defining parameter range
+        # define the parameter range
         param_grid = {'C': [0.000001, 0.00001, 0.0001, 0.001, 0.01, 0.1, 1, 10]}
-
+        # use grid search to compare different parameter
         grid = GridSearchCV(LogisticRegression(multi_class="ovr", solver="sag",
                                                max_iter=4000),
                                                param_grid,
                                                refit=True, verbose=2, cv=5)
 
         start = time()
-        # fitting the model for grid search
+        # fit the model for grid search
         grid.fit(self.data.X_all, self.data.y_all)
-        # print best parameter after tuning
+        # print the best parameter after tuning
         print(grid.best_params_)
-        # print how our model looks after hyper-parameter tuning
+        # print the best model
         lr = grid.best_estimator_
         self.best_models.append(lr)
         end = time()
@@ -107,23 +118,23 @@ class Compare:
 
         self.get_cross_val_score(lr, 'Logistic Regression', self.data.X_all, self.data.y_all)
 
-        class_name = ['A', 'D', 'H']
-        title = "Confusion matrix with normalization"
+        class_name = [1, 2, 3]
+        title = "Confusion matrix with normalization for Logistic Regression"
         self.plot_confusion(lr, class_name, self.data.X_test, self.data.y_test, title)
 
     def trySVM(self):
-        # defining parameter range
+        # define parameter range
         param_grid = {'C': [0.01, 0.1, 1, 10, 100, 1000],
                       'gamma': [1, 0.1, 0.01, 0.001, 0.0001],
                       'kernel': ['linear', 'rbf', 'sigmoid']}
-
+        # use grid search to compare different parameter
         grid = GridSearchCV(svm.SVC(), param_grid, refit=True, verbose=2, cv=5)
 
-        # fitting the model for grid search
+        # fit the model for grid search
         grid.fit(self.data.X_all, self.data.y_all)
-        # print best parameter after tuning
+        # print the best parameter after tuning
         print(grid.best_params_)
-        # print how our model looks after hyper-parameter tuning
+        # print the best model
         gsvm = grid.best_estimator_
         self.best_models.append(gsvm)
 
@@ -137,8 +148,8 @@ class Compare:
         self.get_cross_val_score(
             gsvm, 'Support Vector Machine', self.data.X_all, self.data.y_all)
 
-        class_name = ['A', 'D', 'H']
-        title = "Confusion matrix with normalization"
+        class_name = [1, 2, 3]
+        title = "Confusion matrix with normalization for Support Vector Machine"
         self.plot_confusion(gsvm, class_name, self.data.X_test,
                             self.data.y_test, title)
         
@@ -156,20 +167,24 @@ class Compare:
         self.get_cross_val_score(
             gnb, 'Guassian Naive Bayesian', self.data.X_all, self.data.y_all)
 
-    def trykNN(self):
-        param_grid = {'n_neighbors': range(1,101)}
+        class_name = [1, 2, 3]
+        title = "Confusion matrix with normalization for Gaussian Naive Bayesian"
+        self.plot_confusion(gnb, class_name, self.data.X_test,
+                            self.data.y_test, title)
 
+    def trykNN(self):
+        # define parameter range
+        param_grid = {'n_neighbors': range(1,101)}
+        # use grid search to compare different parameter
         grid = GridSearchCV(KNeighborsClassifier(), param_grid, refit=True, verbose=2, cv=5)
 
-        # fitting the model for grid search
+        # fit the model for grid search
         grid.fit(self.data.X_all, self.data.y_all)
-        # print best parameter after tuning
+        # print the best parameter after tuning
         print(grid.best_params_)
-        # print how our model looks after hyper-parameter tuning
+        # print the best model
         knn = grid.best_estimator_
         self.best_models.append(knn)
-        # knn = KNeighborsClassifier()
-        # self.best_models.append(knn)
 
         self.classifier_train(knn, self.data.X_train, self.data.y_train)
         f1, acc = self.classifier_score(
@@ -181,8 +196,14 @@ class Compare:
 
         self.get_cross_val_score(
             knn, 'k-Nearest Neighbor', self.data.X_all, self.data.y_all)
+
+        class_name = [1, 2, 3]
+        title = "Confusion matrix with normalization for k-Nearest Neighbor"
+        self.plot_confusion(knn, class_name, self.data.X_test,
+                            self.data.y_test, title)
     
     def tryNN(self):
+        # change the probabilities output to the acutual result
         def to_result(data):
             result = []
             for i in range(len(data)):
@@ -198,7 +219,9 @@ class Compare:
         X_train_1, X_test_1, y_train_1, y_test_1 = train_test_split(self.data.X_all, self.data.y_all,
                                                                 test_size=0.2,
                                                                 random_state=100)
+        # build the neural network model
         nn = Neural_Network(self.data.X_all.shape[1], len(self.data.y_all.unique()))
+        # set the early stopping based on the accuracy
         es = EarlyStopping(monitor='val_accuracy',
                            mode='max', verbose=1, patience=50)
         train = nn.model.fit(X_train_1, to_categorical(y_train_1)[:, [1, 2, 3]], batch_size=64,
@@ -215,17 +238,17 @@ class Compare:
 
         plt.plot(train.history['accuracy'])
         plt.plot(train.history['val_accuracy'])
-        plt.title('model accuracy')
-        plt.ylabel('accuracy')
-        plt.xlabel('epoch')
+        plt.title('Model Accuracy')
+        plt.ylabel('Accuracy')
+        plt.xlabel('Epoch')
         plt.legend(['train', 'test'], loc='lower right')
         plt.show()
         # summarize history for loss
         plt.plot(train.history['loss'])
         plt.plot(train.history['val_loss'])
-        plt.title('model loss')
-        plt.ylabel('loss')
-        plt.xlabel('epoch')
+        plt.title('Model Loss')
+        plt.ylabel('Loss')
+        plt.xlabel('Epoch')
         plt.legend(['train', 'test'], loc='upper right')
         plt.show()
 
@@ -239,16 +262,15 @@ class Compare:
                                         show_normed=True)
         # plot confusion matrix
         plt.show()
-        # print(s)
+
         es_2 = EarlyStopping(monitor='loss', mode='min', verbose=1, patience=20)
-        #because we are using cross validation, no val set is used, so we early stop using the training
-        #loss metrics,but we set the epochs to 150, because the loss function turns to be stable
+        # due to the cross validation, the early stop should be set by the loss
         kfold = StratifiedKFold(n_splits=5, shuffle=True, random_state=100)
         cross_val = []
         for train, test in kfold.split(self.data.X_all, self.data.y_all):
             nn_temp = Neural_Network(
                 self.data.X_all.shape[1], len(self.data.y_all.unique()))
-            #standardised input
+            # the epochs is set to 60 based on the early stopping above
             train_history = nn_temp.model.fit(self.data.X_all.loc[train], to_categorical(
                 self.data.y_all)[:, [1, 2, 3]][train],
                                             batch_size=64, verbose=0, epochs=60,
