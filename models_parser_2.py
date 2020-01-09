@@ -156,8 +156,20 @@ class Compare:
             gnb, 'Guassian Naive Bayesian', self.data.X_all, self.data.y_all)
 
     def trykNN(self):
-        knn = KNeighborsClassifier()
+        param_grid = {'n_neighbors': range(1,101)}
+
+        grid = GridSearchCV(KNeighborsClassifier(), param_grid, refit=True, verbose=2, cv=5)
+
+        # fitting the model for grid search
+        grid.fit(self.data.X_all, self.data.y_all)
+        # print best parameter after tuning
+        print(grid.best_params_)
+        # print how our model looks after hyper-parameter tuning
+        knn = grid.best_estimator_
         self.best_models.append(knn)
+        # knn = KNeighborsClassifier()
+        # self.best_models.append(knn)
+
         self.classifier_train(knn, self.data.X_train, self.data.y_train)
         f1, acc = self.classifier_score(
             knn, self.data.X_test, self.data.y_test)
@@ -200,6 +212,22 @@ class Compare:
         print("Accuracy: " + str(result[2]))
         print("==================================\n")
 
+        plt.plot(train.history['accuracy'])
+        plt.plot(train.history['val_accuracy'])
+        plt.title('model accuracy')
+        plt.ylabel('accuracy')
+        plt.xlabel('epoch')
+        plt.legend(['train', 'test'], loc='lower right')
+        plt.show()
+        # summarize history for loss
+        plt.plot(train.history['loss'])
+        plt.plot(train.history['val_loss'])
+        plt.title('model loss')
+        plt.ylabel('loss')
+        plt.xlabel('epoch')
+        plt.legend(['train', 'test'], loc='upper right')
+        plt.show()
+
         y_pred = nn.model.predict(self.data.X_test)
         nn_cm = confusion_matrix(
             self.data.y_test, to_result(y_pred), labels=[1, 2, 3])
@@ -210,7 +238,7 @@ class Compare:
                                         show_normed=True)
         # plot confusion matrix
         plt.show()
-
+        # print(s)
         es_2 = EarlyStopping(monitor='loss', mode='min', verbose=1, patience=20)
         #because we are using cross validation, no val set is used, so we early stop using the training
         #loss metrics,but we set the epochs to 150, because the loss function turns to be stable
@@ -222,7 +250,7 @@ class Compare:
             #standardised input
             train_history = nn_temp.model.fit(self.data.X_all.loc[train], to_categorical(
                 self.data.y_all)[:, [1, 2, 3]][train],
-                                            batch_size=64, verbose=0, epochs=150,
+                                            batch_size=64, verbose=0, epochs=60,
                                             callbacks=[es_2])
             val_history = nn_temp.model.evaluate(
                 self.data.X_all.loc[test], to_categorical(self.data.y_all)[:, [1, 2, 3]][test], verbose = 0)
@@ -233,10 +261,10 @@ class Compare:
         self.update_accuracies('Neural Network', np.average(cross_val))
         
     def get_best_model(self):
-        self.tryLR()
-        self.trySVM()
-        self.tryGNB()
-        self.trykNN()
+        # self.tryLR()
+        # self.trySVM()
+        # self.tryGNB()
+        # self.trykNN()
         self.tryNN()
         print(self.accuracies)
         models = ['LR', 'SVM', 'GNB', 'KNN', 'NN']
