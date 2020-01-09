@@ -105,7 +105,7 @@ def get_twenty_latest_team_matches(team_name, data_frame, row_idx):
 
     return data_frame.iloc[twenty_matches_row_idx_list]
 
-def non_shot_feature_selection(training_data,team_ratings_data):
+def non_shot_feature_selection(training_data, team_ratings_data):
     """
     Select features that have correlation values above the defined threshold.
 
@@ -114,7 +114,7 @@ def non_shot_feature_selection(training_data,team_ratings_data):
     :return: an array containing names of the selected feature
     """
 
-    data = pd.concat([training_data,team_ratings_data],axis=1)
+    data = pd.concat([training_data, team_ratings_data], axis=1, ignore_index=False)
     column_heads_to_drop = ['HomeTeam', 'AwayTeam', 'Date', 'Referee', 'FTHG', 'FTAG', 'HTHG', 'HTAG', 'HS', 'AS',
                             'HST', 'AST','HTR']
     all_columns_to_drop = [col for col in data
@@ -130,39 +130,100 @@ def non_shot_feature_selection(training_data,team_ratings_data):
 
     return selected_features
 
+def extract_test_data(test_data, selected_features, ratings_data, ratings_history):
+    test_result = pd.DataFrame(columns=[selected_features])
+    print(test_result)
+    team_list_h = [col for col in test_data
+                               if col.startswith('HomeTeam')]
+    team_list_a = [col for col in test_data
+                               if col.startswith('AwayTeam')]
+    h_list = [col for col in selected_features if col.startswith('H')]
+    a_list = [col for col in selected_features if col.startswith('A')]
+    for i in range(len(test_data)):
+        test = pd.DataFrame(columns=[selected_features])
+        for team in team_list_h:
+            if test_data.loc[i, team] == 1:
+                print(team)
+                home_team_twenty_results = get_twenty_latest_team_matches(
+                    team, pd.concat([data, ratings_data], axis=1), -1)
+                home_team_twenty_results = home_team_twenty_results[h_list]
+                for name in h_list:
+                    if name == 'HomeRatings':
+                        team_used = team.replace('HomeTeam_', '')
+                        print(team_used)
+                        idx = ratings_history[ratings_history['Team']
+                                              == team_used].index.values
+                        print(idx)
+                        test.loc[i, name] = ratings_history.loc[idx[0], 'Ratings']
+                    else:
+                        test.loc[i, name] = home_team_twenty_results[name].mean()
+        for team in team_list_a:
+            if test_data.loc[i, team] == 1:
+                away_team_twenty_results = get_twenty_latest_team_matches(
+                    team, pd.concat([data, ratings_data], axis=1), -1)
+                away_team_twenty_results = away_team_twenty_results[a_list]
+                for name in a_list:
+                    if name == 'AwayRatings':
+                        team_used = team.replace('AwayTeam_', '')
+                        idx = ratings_history[ratings_history['Team']
+                                              == team_used].index.values
+                        test.loc[i, name] = ratings_history.loc[idx[0], 'Ratings']
+                    else:
+                        test.loc[i, name] = away_team_twenty_results[name].mean()
+        print(test)
+        test_result = test_result.append(test)
+    print(test_result)
+    return test_result
+
+def to_result(data):
+    result = []
+    for i in range(len(data)):
+        d_max = np.amax(data[i])
+        if data[i][0] == d_max:
+            result.append(1)
+        elif data[i][1] == d_max:
+            result.append(2)
+        else:
+            result.append(3)
+    return result
+
+from team_ratings import Ratings
+
+data, test = format_data('epl-training.csv','epl-test.csv','data_updated.csv')
+# ratings = Ratings(data)
+# ratings_data = ratings.result
+# ratings_history = ratings.rating
+# training_data = pd.concat(
+#     [data, ratings_data], axis=1, ignore_index=False)
+# training_data.to_csv('/Users/Manny/Desktop/Data.csv')
+# ratings_history.to_csv('/Users/Manny/Desktop/Data_2.csv')
 ratings_data = load_file('Data.csv')
 ratings_data = ratings_data[['HomeRatings','AwayRatings']]
-data, test = format_data('epl-training.csv','epl-test.csv','data_updated.csv')
-
-selected_features = non_shot_feature_selection(data,ratings_data)
+ratings_history = load_file('Data_2.csv')
+print(ratings_history)
+selected_features = non_shot_feature_selection(data, ratings_data)
+print(selected_features)
+pred_data = extract_test_data(test, selected_features, ratings_data, ratings_history)
 
 from models_parser_2 import Compare
 
 models_comparison_obj = Compare(pd.concat([data,ratings_data],axis=1)[selected_features],data['FTR'])
 
+from keras.callbacks import EarlyStopping
+from keras.utils import to_categorical
 """
 Final Prediction to be completed
 """
-# best_model = models_comparison_obj.best_model
-# best_model.fit(pd.concat([data,ratings_data],axis=1)[selected_features],data['FTR'])
-#
-# home_team_twenty_results = get_twenty_latest_team_matches('HomeTeam_Bournemouth',pd.concat([data,ratings_data],axis=1),-1)
-# home_team_ratings = home_team_twenty_results['HomeRatings']
-# home_team_twenty_results = home_team_twenty_results[['HC','HY','HR']]
-# away_team_twenty_results = get_twenty_latest_team_matches('AwayTeam_Watford',pd.concat([data,ratings_data],axis=1),-1)
-# away_team_ratings = away_team_twenty_results['AwayRatings']
-# away_team_twenty_results = away_team_twenty_results[['AC','AR']]
-#
-# combined_results = pd.concat([home_team_twenty_results,away_team_twenty_results],axis=1)
-# input_data =[]
-# for feature in selected_features:
-#     if feature == 'HomeRatings':
-#         input_data.append(home_team_ratings.iloc[-1])
-#     elif feature == 'AwayRatings':
-#         input_data.append(away_team_ratings.iloc[-1])
-#     else:
-#         input_data.append(combined_results[feature].mean())
-#
-# y_pred = best_model.predict(pd.Series(input_data))
-# print(pd.DataFrame(input_data))
-# print(y_pred)
+best_model = models_comparison_obj.best_model
+print(pred_data)
+if models_comparison_obj.best_idx == 4:
+    es = EarlyStopping(monitor='loss', mode='min', verbose=1, patience=20)
+    best_model.model.fit(pd.concat([data, ratings_data], axis=1)[selected_features], to_categorical(
+        data['FTR'])[:, [1, 2, 3]], batch_size=64, verbose=0, epochs=60, callbacks=[es])
+    y_r = best_model.model.predict(pred_data)
+else:
+    best_model.fit(pd.concat([data, ratings_data], axis=1)[selected_features], data['FTR'])
+    y_r = best_model.predict(pred_data)
+
+print('The final prediction is:')
+print(y_r)
