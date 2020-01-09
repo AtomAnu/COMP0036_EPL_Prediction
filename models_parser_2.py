@@ -240,16 +240,16 @@ class Compare:
         self.tryNN()
         print(self.accuracies)
         models = ['LR', 'SVM', 'GNB', 'KNN', 'NN']
-        # models = ['LR', 'GNB', 'KNN', 'NN']
-        plt.bar(models, np.array(self.accuracies))
+        # models = ['GNB', 'KNN']
+        plt.bar(models, np.array(self.accuracies['Accuracies']))
         plt.title('Accuracy Comparison')
         plt.xlabel('model')
         plt.ylabel('accuracy')
-        plt.ylim((0.45, 0.55))
         plt.show()
         best_idx = np.argmax(np.array(self.accuracies['Accuracies']))
+        print(best_idx)
         if best_idx == 4:
-            return Neural_Network(self.data.X_all.shape[1], self.data.y_all.shape[1])
+            return Neural_Network(self.data.X_all.shape[1], len(self.data.y_all.unique()))
         else:
             return self.best_models[best_idx]
 
