@@ -262,19 +262,19 @@ class Compare:
         self.update_accuracies('Neural Network', np.average(cross_val))
         
     def get_best_idx(self):
-        # self.tryLR()
-        # self.trySVM()
+        self.tryLR()
+        self.trySVM()
         self.tryGNB()
         self.trykNN()
-        # self.tryNN()
+        self.tryNN()
         print(self.accuracies)
-        # models = ['LR', 'SVM', 'GNB', 'KNN', 'NN']
-        # # models = ['GNB', 'KNN']
-        # plt.bar(models, np.array(self.accuracies['Accuracies']))
-        # plt.title('Accuracy Comparison')
-        # plt.xlabel('model')
-        # plt.ylabel('accuracy')
-        # plt.show()
+        models = ['LR', 'SVM', 'GNB', 'KNN', 'NN']
+        # models = ['GNB', 'KNN']
+        plt.bar(models, np.array(self.accuracies['Accuracies']))
+        plt.title('Accuracy Comparison')
+        plt.xlabel('model')
+        plt.ylabel('accuracy')
+        plt.show()
         best_idx = np.argmax(np.array(self.accuracies['Accuracies']))
         return best_idx
 
