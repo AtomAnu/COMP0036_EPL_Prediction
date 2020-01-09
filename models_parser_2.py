@@ -37,6 +37,7 @@ class Compare:
         self.accuracies = pd.DataFrame(columns=['Models', 'Accuracies'])
         self.data = Data(X, y)
         self.best_models = []
+        self.best_idx = self.get_best_idx()
         self.best_model = self.get_best_model()
 
     def update_accuracies(self, model_name, accuracy):
@@ -260,24 +261,26 @@ class Compare:
             (np.average(cross_val)*100, np.std(cross_val)*100))
         self.update_accuracies('Neural Network', np.average(cross_val))
         
-    def get_best_model(self):
+    def get_best_idx(self):
         # self.tryLR()
         # self.trySVM()
-        # self.tryGNB()
-        # self.trykNN()
-        self.tryNN()
+        self.tryGNB()
+        self.trykNN()
+        # self.tryNN()
         print(self.accuracies)
-        models = ['LR', 'SVM', 'GNB', 'KNN', 'NN']
-        # models = ['GNB', 'KNN']
-        plt.bar(models, np.array(self.accuracies['Accuracies']))
-        plt.title('Accuracy Comparison')
-        plt.xlabel('model')
-        plt.ylabel('accuracy')
-        plt.show()
+        # models = ['LR', 'SVM', 'GNB', 'KNN', 'NN']
+        # # models = ['GNB', 'KNN']
+        # plt.bar(models, np.array(self.accuracies['Accuracies']))
+        # plt.title('Accuracy Comparison')
+        # plt.xlabel('model')
+        # plt.ylabel('accuracy')
+        # plt.show()
         best_idx = np.argmax(np.array(self.accuracies['Accuracies']))
-        print(best_idx)
-        if best_idx == 4:
+        return best_idx
+
+    def get_best_model(self):
+        if self.best_idx == 4:
             return Neural_Network(self.data.X_all.shape[1], len(self.data.y_all.unique()))
         else:
-            return self.best_models[best_idx]
+            return self.best_models[self.best_idx]
 
