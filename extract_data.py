@@ -1,5 +1,8 @@
 import os
 import pandas as pd
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 def load_file(file_name):
     """
@@ -124,6 +127,10 @@ def non_shot_feature_selection(training_data, team_ratings_data):
 
     corrmat = data.corr()
     FTR_corr = corrmat.loc['FTR'].abs().drop('FTR')
+
+    colormap = plt.cm.RdBu
+    sns.heatmap(corrmat, linewidths=0.01, vmax=1.0, cmap=colormap)
+
     feature_corr_thershold = 0.05
     selected_features_idx = [row for row in range(FTR_corr.shape[0]) if FTR_corr[row] >= feature_corr_thershold]
     selected_features = FTR_corr[selected_features_idx].index.values
@@ -131,8 +138,17 @@ def non_shot_feature_selection(training_data, team_ratings_data):
     return selected_features
 
 def extract_test_data(test_data, selected_features, ratings_data, ratings_history):
+    """
+    Change the format of the test data to the format satisified the required format for the prediction
+
+    :param test: DataFrame containing the test data
+    :param selected_features: Array containing the features names that will be used in prediction
+    :param ratings_data: DataFrame containing the team ratings for both home and away team for each match in the training data
+    :param ratings_history: DataFrame containing the current team ratings for each team
+    :return: an DataFrame containing modified test data
+    """
+
     test_result = pd.DataFrame(columns=[selected_features])
-    print(test_result)
     team_list_h = [col for col in test_data
                                if col.startswith('HomeTeam')]
     team_list_a = [col for col in test_data
@@ -151,6 +167,7 @@ def extract_test_data(test_data, selected_features, ratings_data, ratings_histor
                     if name == 'HomeRatings':
                         team_used = team.replace('HomeTeam_', '')
                         print(team_used)
+                        # get the current Team Rating of the selected team
                         idx = ratings_history[ratings_history['Team']
                                               == team_used].index.values
                         print(idx)
@@ -175,6 +192,7 @@ def extract_test_data(test_data, selected_features, ratings_data, ratings_histor
     print(test_result)
     return test_result
 
+# change the probabilities output to the acutual result
 def to_result(data):
     result = []
     for i in range(len(data)):
@@ -200,9 +218,7 @@ data, test = format_data('epl-training.csv','epl-test.csv','data_updated.csv')
 ratings_data = load_file('Data.csv')
 ratings_data = ratings_data[['HomeRatings','AwayRatings']]
 ratings_history = load_file('Data_2.csv')
-print(ratings_history)
 selected_features = non_shot_feature_selection(data, ratings_data)
-print(selected_features)
 pred_data = extract_test_data(test, selected_features, ratings_data, ratings_history)
 
 from models_parser_2 import Compare
@@ -212,7 +228,7 @@ models_comparison_obj = Compare(pd.concat([data,ratings_data],axis=1)[selected_f
 from keras.callbacks import EarlyStopping
 from keras.utils import to_categorical
 """
-Final Prediction to be completed
+Final Prediction
 """
 best_model = models_comparison_obj.best_model
 print(pred_data)
