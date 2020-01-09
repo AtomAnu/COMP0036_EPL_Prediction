@@ -69,13 +69,13 @@ class Ratings:
             expect_a = self.compute_score(
                 self.rating.loc[rating_a_team, 'Ratings'], self.rating.loc[rating_h_team, 'Ratings'])
 
-            if X.loc[i, 'FTR_H'] == 1:
+            if X.loc[i, 'FTR'] == 1:
                 adjust_h = 1
                 adjust_a = 0
-            elif X.loc[i, 'FTR_A'] == 1:
+            elif X.loc[i, 'FTR'] == 3:
                 adjust_h = 0
                 adjust_a = 1
-            elif X.loc[i, 'FTR_D'] == 1:
+            elif X.loc[i, 'FTR'] == 2:
                 adjust_h = 0.5
                 adjust_a = 0.5
             self.rating.loc[rating_h_team, 'Ratings'] = self.rating.loc[rating_h_team, 'Ratings'] + \
