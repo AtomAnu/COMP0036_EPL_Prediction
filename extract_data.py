@@ -116,7 +116,7 @@ def non_shot_feature_selection(training_data,team_ratings_data):
 
     data = pd.concat([training_data,team_ratings_data],axis=1)
     column_heads_to_drop = ['HomeTeam', 'AwayTeam', 'Date', 'Referee', 'FTHG', 'FTAG', 'HTHG', 'HTAG', 'HS', 'AS',
-                            'HST', 'AST']
+                            'HST', 'AST','HTR']
     all_columns_to_drop = [col for col in data
                            for chosen_col in column_heads_to_drop if col.startswith(chosen_col)]
 
@@ -139,8 +139,30 @@ selected_features = non_shot_feature_selection(data,ratings_data)
 from models_parser_2 import Compare
 
 models_comparison_obj = Compare(pd.concat([data,ratings_data],axis=1)[selected_features],data['FTR'])
-# models_comparison_obj.tryLR()
-# models_comparison_obj.tryGNB()
-# models_comparison_obj.trySVM()
-# models_comparison_obj.trykNN()
-# print(models_comparison_obj.accuracies)
+
+"""
+Final Prediction to be completed
+"""
+# best_model = models_comparison_obj.best_model
+# best_model.fit(pd.concat([data,ratings_data],axis=1)[selected_features],data['FTR'])
+#
+# home_team_twenty_results = get_twenty_latest_team_matches('HomeTeam_Bournemouth',pd.concat([data,ratings_data],axis=1),-1)
+# home_team_ratings = home_team_twenty_results['HomeRatings']
+# home_team_twenty_results = home_team_twenty_results[['HC','HY','HR']]
+# away_team_twenty_results = get_twenty_latest_team_matches('AwayTeam_Watford',pd.concat([data,ratings_data],axis=1),-1)
+# away_team_ratings = away_team_twenty_results['AwayRatings']
+# away_team_twenty_results = away_team_twenty_results[['AC','AR']]
+#
+# combined_results = pd.concat([home_team_twenty_results,away_team_twenty_results],axis=1)
+# input_data =[]
+# for feature in selected_features:
+#     if feature == 'HomeRatings':
+#         input_data.append(home_team_ratings.iloc[-1])
+#     elif feature == 'AwayRatings':
+#         input_data.append(away_team_ratings.iloc[-1])
+#     else:
+#         input_data.append(combined_results[feature].mean())
+#
+# y_pred = best_model.predict(pd.Series(input_data))
+# print(pd.DataFrame(input_data))
+# print(y_pred)
