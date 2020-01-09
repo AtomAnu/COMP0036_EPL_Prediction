@@ -1,18 +1,8 @@
 from keras.models import Sequential
-from keras.layers import Dense, Dropout
+from keras.layers import Dense
 from keras.optimizers import Adam
-from keras.optimizers import RMSprop
 from keras import backend as K
 from keras import regularizers
-from sklearn import preprocessing
-import numpy as np
-import tensorflow as tf
-import h5py
-from sklearn.model_selection import train_test_split
-import matplotlib.pyplot as plt
-
-from keras.callbacks import Callback
-from sklearn.metrics import confusion_matrix, f1_score, precision_score, recall_score
 
 def f1(y_true, y_pred):
     def recall(y_true, y_pred):
