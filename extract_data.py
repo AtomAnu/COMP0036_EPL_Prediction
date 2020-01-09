@@ -11,8 +11,7 @@ def load_file(file_name):
     :return: extracted and stripped data in the DataFrame type
     """
 
-    #find the path of the wanted file
-    file_dir = os.path.dirname(os.path.abspath(__file__))
+    file_dir = os.path.realpath('./')
     for root, dirs, files in os.walk(file_dir):
         for name in files:
             if name == file_name:
