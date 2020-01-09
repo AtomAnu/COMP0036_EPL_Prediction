@@ -2,6 +2,15 @@ import pandas as pd
 import numpy as np
 
 class Ratings:
+    """
+    Calculate the Team ELO Ratings for the training data and store the current ratings for all teams
+
+    home_team_list: List containing the team name with 'HomeTeam_'
+    team_list: List containing the team name
+    away_team_list: List containing the team name with 'AwayTeam'
+    rating: DataFrame containing teams' current rating
+    result: DataFrame containing ratings for the training data
+    """
     def __init__(self, X):
         self.home_team_list = [col for col in X
                         if col.startswith('HomeTeam')]
@@ -78,6 +87,7 @@ class Ratings:
             elif X.loc[i, 'FTR'] == 2:
                 adjust_h = 0.5
                 adjust_a = 0.5
+            
             self.rating.loc[rating_h_team, 'Ratings'] = self.rating.loc[rating_h_team, 'Ratings'] + \
                 self.compute_k(
                     self.rating.loc[rating_h_team, 'Ratings']) * (adjust_h - expect_h)
@@ -86,6 +96,7 @@ class Ratings:
                     self.rating.loc[rating_a_team, 'Ratings']) * (adjust_a - expect_a)
         return match_ratings
 
+    # calculate the weight for the change of the rating
     def compute_k(self, rating):
         if rating >= 2400:
             return 15
@@ -93,10 +104,6 @@ class Ratings:
             return 20
         else:
             return 25
-        # if label == 'Home':
-        #     return 20 * self.h_tilt.loc[nrow]
-        # elif label == 'Away':
-        #     return 20 * self.a_tilt.loc[nrow]
 
     def compute_score(self, rating1, rating2):
         return 1 / (1+pow(10, (rating2 - rating1) / 400))
