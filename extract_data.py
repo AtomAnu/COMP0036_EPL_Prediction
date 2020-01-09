@@ -227,3 +227,11 @@ else:
 
 print('The final prediction is:')
 print(y_r)
+result = pd.DataFrame({'FTR_Predicted': y_r})
+print(result)
+result = result['FTR_Predicted'].map({1: 'H', 2: 'D', 3: 'A'})
+final_team = load_file('epl-test.csv')
+print(final_team)
+final = pd.concat([final_team, result], axis=1)
+print(final)
+final.to_csv('/Users/Manny/Desktop/Prediction.csv')
