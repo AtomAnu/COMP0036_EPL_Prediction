@@ -10,7 +10,8 @@ class Team():
         self.degree = degree
 
         self.X_train, self.X_test, \
-            self.y_train, self.y_test = self.preprocessing(self.X, self.y, degree)
+            self.y_train, self.y_test, self.X_all = self.preprocessing(self.X, self.y, degree)
+        
 
     def preprocessing(self, X, y, degree):
         """
@@ -32,5 +33,6 @@ class Team():
 
         X_train = scaler.fit_transform(X_train)
         X_test = scaler.transform(X_test)
+        X_all = scaler.transform(X)
 
-        return X_train, X_test, y_train, y_test
+        return X_train, X_test, y_train, y_test, X_all
